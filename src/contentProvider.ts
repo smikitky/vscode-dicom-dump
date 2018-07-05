@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { TextDocumentContentProvider } from 'vscode';
 import * as fs from 'fs';
+import * as pify from 'pify';
 import * as dicomParser from 'dicom-parser';
 import { standardDataElements as dict } from 'dicom-data-dictionary';
 
@@ -84,20 +85,26 @@ const textRepresentationOfElement = (dataSet: any, key: string) => {
   }
 };
 
+const readFile = pify(fs.readFile);
+
 /**
  * DicomContentProvider is responsible for generating a virtual document
  * that contains the DICOM tags.
  */
 export class DicomContentProvider implements TextDocumentContentProvider {
-  public async provideTextDocumentContent(url: vscode.Uri): Promise<string> {
-    const path = url.fsPath;
-    if (!fs.existsSync(path)) {
-      await vscode.window.showErrorMessage(`No such file: ${path}.`);
+  public async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
+    if (!(uri instanceof vscode.Uri)) return '';
+    const path = uri.fsPath;
+    let dataSet: any;
+    try {
+      const fileContent = await readFile(path);
+      const ba = new Uint8Array(fileContent.buffer);
+      dataSet = dicomParser.parseDicom(ba);
+    } catch (e) {
+      await vscode.window.showErrorMessage('Error opening DICOM file.');
+      return '';
     }
-    const ba = new Uint8Array(fs.readFileSync(path).buffer);
-    const dataSet = dicomParser.parseDicom(ba);
     const entries: Entry[] = [];
-
     for (let key in dataSet.elements) {
       const element = dataSet.elements[key];
       const tagInfo = findTagInfo(element.tag);
