@@ -31,9 +31,9 @@ const textRepresentationOfNumberList = (
 ) => {
   const numElements = dataSet.elements[key].length / valueBytes;
   let result = '';
-  for (let i = 0; i <= numElements; i++) {
+  for (let i = 0; i < numElements; i++) {
     if (i > 0) result += '\\';
-    result += dataSet[accessor](key, i + 1);
+    result += dataSet[accessor](key, i);
   }
   return result;
 };
