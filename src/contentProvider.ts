@@ -70,8 +70,16 @@ const textRepresentationOfElement = (dataSet: any, key: string, vr: string) => {
     case 'UN': {
       // "Unknown" VR. We have no clue as to how to represent this.
       const str = dataSet.string(key);
-      const isAscii = /^[\x20-\x7E]*$/.test(str);
+      const isAscii = /^[\x20-\x7E]+$/.test(str);
       if (isAscii) return str;
+      if (element.length <= 16) {
+        const bin = Buffer.from(
+          dataSet.byteArray.buffer,
+          element.dataOffset,
+          element.length
+        );
+        return `<bin: 0x${bin.toString('hex')}>`;
+      }
       return `<seemengly binary data (UN) of length: ${element.length}>`;
     }
     default:
