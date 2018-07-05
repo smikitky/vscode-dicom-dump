@@ -22,6 +22,15 @@
         "title": "Show DICOM tags"
       }
     ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "dicom.showTags",
+          "group": "dicom",
+          "when": "resourceLangId == dicom"
+        }
+      ]
+    },
     "languages": [
       {
         "id": "dicom",
@@ -52,5 +61,8 @@
   },
   "prettier": {
     "singleQuote": true
+  },
+  "dependencies": {
+    "dicom-parser": "^1.8.1"
   }
 }
