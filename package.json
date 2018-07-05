@@ -1,8 +1,9 @@
 {
   "name": "vscode-dicom",
   "displayName": "DICOM Tag Dump",
-  "description": "Shows the list of DICOM tags",
-  "version": "0.0.1",
+  "description": "Shows the list of DICOM tags in the editor.",
+  "icon": "./icon.png",
+  "version": "0.1.0",
   "publisher": "smikitky",
   "engines": {
     "vscode": "^1.24.0"
