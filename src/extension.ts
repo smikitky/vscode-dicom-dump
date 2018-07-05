@@ -2,7 +2,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as dicomParser from 'dicom-parser';
-import dict from './dictionary';
+import { standardDataElements as dict } from 'dicom-data-dictionary';
 
 const scheme = 'dicom-dump';
 
@@ -38,29 +38,78 @@ interface Entry {
   text: string;
 }
 
-const isStringVr = (vr: string) => {
-  if (
-    vr === 'AT' ||
-    vr === 'FL' ||
-    vr === 'FD' ||
-    vr === 'OB' ||
-    vr === 'OF' ||
-    vr === 'OW' ||
-    vr === 'SI' ||
-    vr === 'SQ' ||
-    vr === 'SS' ||
-    vr === 'UL' ||
-    vr === 'US'
-  ) {
-    return false;
-  }
-  return true;
+const findTagInfo = (tag: string) => {
+  const key = tag.substring(1, 9).toUpperCase();
+  return dict[key];
 };
 
 const formatTag = (tag: string) => {
-  const group = tag.substring(1, 5);
-  const element = tag.substring(5, 9);
-  return ('(' + group + ',' + element + ')').toUpperCase();
+  const group = tag.substring(1, 5).toUpperCase();
+  const element = tag.substring(5, 9).toUpperCase();
+  return `[${group},${element}]`;
+};
+
+const textRepresentationOfNumberLists = (
+  dataSet: any,
+  key: string,
+  accessor: string,
+  valueBytes: number
+) => {
+  const numElements = dataSet.elements[key].length / valueBytes;
+  let result = '';
+  for (let i = 0; i <= numElements; i++) {
+    if (i > 0) result += '\\';
+    result += dataSet[accessor](key, i + 1);
+  }
+  return result;
+};
+
+const textRepresentationOfElement = (dataSet: any, key: string) => {
+  const element = dataSet.elements[key];
+  const tagInfo = findTagInfo(element.tag);
+  if (element.items) {
+    // not supported!
+    return '[Sequence]';
+  }
+  if (element.fragments) {
+    // not supported!
+    return '[Fragments]';
+  }
+  const vr: string | undefined =
+    element.vr || (tagInfo ? tagInfo.vr : undefined);
+
+  switch (vr) {
+    case 'OB':
+    case 'OW':
+    case 'OF':
+      return `[Binary data of length: ${element.length}]`;
+    case 'SI':
+      return 'What is this?';
+    case 'SQ':
+      return 'What is this?';
+    case 'AT': {
+      const group = dataSet.uint16(key, 0);
+      const groupHexStr = ('0000' + group.toString(16)).substr(-4);
+      const element = dataSet.uint16(key, 1);
+      const elementHexStr = ('0000' + element.toString(16)).substr(-4);
+      return 'x' + groupHexStr + elementHexStr;
+    }
+    case 'FL':
+      return textRepresentationOfNumberLists(dataSet, key, 'float', 4);
+    case 'FD':
+      return textRepresentationOfNumberLists(dataSet, key, 'double', 8);
+    case 'UL':
+      return textRepresentationOfNumberLists(dataSet, key, 'uint32', 4);
+    case 'SL':
+      return textRepresentationOfNumberLists(dataSet, key, 'int32', 4);
+    case 'US':
+      return textRepresentationOfNumberLists(dataSet, key, 'uint16', 2);
+    case 'SS':
+      return textRepresentationOfNumberLists(dataSet, key, 'int16', 2);
+    default:
+      // string VR
+      return dataSet.string(key);
+  }
 };
 
 /**
@@ -79,21 +128,10 @@ class DicomContentProvider implements vscode.TextDocumentContentProvider {
 
     for (let key in dataSet.elements) {
       const element = dataSet.elements[key];
-      const tagStr = formatTag(element.tag);
-      const tagInfo = dict[tagStr];
-      let text: string = '';
-      if (element.items) text = '[Sequence]';
-      else if (element.fragments) text = '[Fragments]';
-      else {
-        const vr: string | undefined =
-          element.vr || (tagInfo ? tagInfo.vr : undefined);
-        if (vr && isStringVr(vr)) {
-          text = dataSet.string(key);
-        }
-      }
-
+      const tagInfo = findTagInfo(element.tag);
+      let text = textRepresentationOfElement(dataSet, key);
       entries.push({
-        tag: tagStr,
+        tag: formatTag(element.tag),
         tagName: tagInfo ? tagInfo.name : '?',
         text
       });

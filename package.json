@@ -63,6 +63,7 @@
     "singleQuote": true
   },
   "dependencies": {
+    "dicom-data-dictionary": "^0.3.1",
     "dicom-parser": "^1.8.1"
   }
 }
