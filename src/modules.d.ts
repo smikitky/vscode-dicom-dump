@@ -1,15 +1,15 @@
 declare module 'dicom-parser';
 
 declare module 'dicom-data-dictionary' {
-  interface StandardDataElements {
-    [tag: string]:
-      | {
-          tag: string;
-          vr: string;
-          vm: string;
-          name: string;
-        }
-      | undefined;
+  export interface TagInfo {
+    tag: string;
+    vr: string;
+    vm: string;
+    name: string;
+  }
+
+  export interface StandardDataElements {
+    [tag: string]: TagInfo | undefined;
   }
   export const standardDataElements: StandardDataElements;
 }
