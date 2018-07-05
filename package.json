@@ -1,7 +1,7 @@
 {
   "name": "vscode-dicom",
-  "displayName": "vscode-dicom",
-  "description": "Shows DICOM tags",
+  "displayName": "DICOM Tag Dump",
+  "description": "Shows the list of DICOM tags",
   "version": "0.0.1",
   "publisher": "smikitky",
   "engines": {
@@ -11,10 +11,17 @@
     "Other"
   ],
   "activationEvents": [
-    "onLanguage:dicom"
+    "onLanguage:dicom",
+    "*"
   ],
   "main": "./out/extension",
   "contributes": {
+    "commands": [
+      {
+        "command": "dicom.showTags",
+        "title": "Show DICOM tags"
+      }
+    ],
     "languages": [
       {
         "id": "dicom",
