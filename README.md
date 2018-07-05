@@ -1,6 +1,6 @@
-# DICOM Dump
+# DICOM Dump for Visual Studio Code
 
-A [vscode][vsc] extension that dumps DICOM tag contents.
+A [Visual Studio Code][vsc] (vscode) extension that dumps DICOM tag contents.
 
 [vsc]: https://code.visualstudio.com/
 
@@ -12,11 +12,12 @@ Right-click on the DICOM file and use the context menu "Show DICOM tags".
 
 ## Features
 
-- Dumps all DICOM tag contents into a human-readable format (except binaries).
-- Understands standard DICOM tags.
+- Dumps all DICOM tags in a human-readable format (except binaries).
+- Understands value representation (VRs) of most standard DICOM tags.
 
 ## Known Issues / Limitations
 
+- Does not (yet) properly support SQ (Sequence of Items) values.
 - Does not work with a virtual file system mounted with `FileSystemProvider`.
 - It's not possible to modify DICOM file.
 
