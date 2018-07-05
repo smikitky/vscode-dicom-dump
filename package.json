@@ -28,7 +28,7 @@
     "commands": [
       {
         "command": "dicom.showTags",
-        "title": "Show DICOM tags"
+        "title": "DICOM: Show DICOM tags"
       }
     ],
     "menus": {
