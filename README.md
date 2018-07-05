@@ -6,7 +6,7 @@ A [Visual Studio Code][vsc] (vscode) extension that dumps DICOM tag contents.
 
 ## Usage
 
-![Screenshot](./doc/screenshot.png)
+![Screenshot](doc/screenshot.png)
 
 Right-click on the DICOM file and use the context menu "Show DICOM tags".
 
