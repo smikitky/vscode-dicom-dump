@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { TextDocumentContentProvider } from 'vscode';
 import * as fs from 'fs';
 import * as dicomParser from 'dicom-parser';
 import { standardDataElements as dict } from 'dicom-data-dictionary';
@@ -87,8 +88,7 @@ const textRepresentationOfElement = (dataSet: any, key: string) => {
  * DicomContentProvider is responsible for generating a virtual document
  * that contains the DICOM tags.
  */
-export class DicomContentProvider
-  implements vscode.TextDocumentContentProvider {
+export class DicomContentProvider implements TextDocumentContentProvider {
   public async provideTextDocumentContent(url: vscode.Uri): Promise<string> {
     const path = url.fsPath;
     if (!fs.existsSync(path)) {
