@@ -52,20 +52,20 @@ const textRepresentationOfElement = (dataSet: any, key: string) => {
     element.vr || (tagInfo ? tagInfo.vr : undefined);
 
   switch (vr) {
-    case 'OB':
-    case 'OW':
-    case 'OF':
-      return `[Binary data of length: ${element.length}]`;
-    case 'SI':
-      return 'What is this?';
+    case 'OB': // Other byte String
+    case 'OW': // Other Word String
+    case 'OD': // Other Double String
+    case 'OF': // Other Float String
+      return `<Binary data (${vr}) of length: ${element.length}>`;
     case 'SQ':
-      return 'What is this?';
+      return '<Sequence of items>';
     case 'AT': {
+      // Attribute Tag
       const group = dataSet.uint16(key, 0);
       const groupHexStr = ('0000' + group.toString(16)).substr(-4);
       const element = dataSet.uint16(key, 1);
       const elementHexStr = ('0000' + element.toString(16)).substr(-4);
-      return 'x' + groupHexStr + elementHexStr;
+      return '0x' + groupHexStr + elementHexStr;
     }
     case 'FL':
       return textRepresentationOfNumberLists(dataSet, key, 'float', 4);
