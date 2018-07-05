@@ -7,6 +7,7 @@ import { standardDataElements as dict } from 'dicom-data-dictionary';
 
 interface Entry {
   tag: string;
+  vr: string;
   tagName: string;
   text: string;
 }
@@ -37,9 +38,8 @@ const textRepresentationOfNumberLists = (
   return result;
 };
 
-const textRepresentationOfElement = (dataSet: any, key: string) => {
+const textRepresentationOfElement = (dataSet: any, key: string, vr: string) => {
   const element = dataSet.elements[key];
-  const tagInfo = findTagInfo(element.tag);
   if (element.items) {
     // not supported!
     return '[Sequence]';
@@ -48,8 +48,6 @@ const textRepresentationOfElement = (dataSet: any, key: string) => {
     // not supported!
     return '[Fragments]';
   }
-  const vr: string | undefined =
-    element.vr || (tagInfo ? tagInfo.vr : undefined);
 
   switch (vr) {
     case 'OB': // Other byte String
@@ -108,15 +106,17 @@ export class DicomContentProvider implements TextDocumentContentProvider {
     for (let key in dataSet.elements) {
       const element = dataSet.elements[key];
       const tagInfo = findTagInfo(element.tag);
-      let text = textRepresentationOfElement(dataSet, key);
+      const vr: string = element.vr || (tagInfo ? tagInfo.vr : undefined);
+      let text = textRepresentationOfElement(dataSet, key, vr);
       entries.push({
         tag: formatTag(element.tag),
+        vr,
         tagName: tagInfo ? tagInfo.name : '?',
         text
       });
     }
     return Promise.resolve(
-      entries.map(e => `${e.tag} ${e.tagName} = ${e.text}`).join('\n')
+      entries.map(e => `${e.tag} ${e.vr} ${e.tagName} = ${e.text}`).join('\n')
     );
   }
 }
