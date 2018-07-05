@@ -41,6 +41,19 @@
         "aliases": [
           "dcm"
         ]
+      },
+      {
+        "id": "dicom-dump",
+        "extensions": [
+          ".dcm-dump"
+        ]
+      }
+    ],
+    "grammars": [
+      {
+        "language": "dicom-dump",
+        "scopeName": "text.dicom-dump",
+        "path": "./syntaxes/dicom-dump.tmLanguage.json"
       }
     ]
   },

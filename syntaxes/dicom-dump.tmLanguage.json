@@ -1,0 +1,45 @@
+{
+  "$schema":
+    "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "DICOM Dump",
+  "patterns": [
+    {
+      "include": "#entry"
+    }
+  ],
+  "repository": {
+    "entry": {
+      "patterns": [
+        {
+          "match":
+            "^(\\[[0-9A-F]{4}\\,[0-9A-F]{4}\\]) (..) (\\w+|\\?) ?= ?(.*)",
+          "captures": {
+            "1": { "patterns": [{ "include": "#tag" }] },
+            "2": { "patterns": [{ "include": "#vr" }] },
+            "3": { "patterns": [{ "include": "#name" }] },
+            "4": { "patterns": [{ "include": "#val" }] }
+          }
+        }
+      ]
+    },
+    "tag": {
+      "patterns": [{ "name": "markup.bold.dicom-dump", "match": ".+" }]
+    },
+    "vr": {
+      "patterns": [{ "name": "storage.type.dicom-dump", "match": ".+" }]
+    },
+    "name": {
+      "patterns": [
+        { "name": "invalid.illegal.dicom-dump", "match": "\\?" },
+        { "name": "keyword.control.dicom-dump", "match": ".+" }
+      ]
+    },
+    "val": {
+      "patterns": [
+        { "name": "markup.italic.dicom-dump", "match": "\\<.+\\>" },
+        { "name": "entity.other.dicom-dump", "match": ".+" }
+      ]
+    }
+  },
+  "scopeName": "text.dicom-dump"
+}

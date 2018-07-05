@@ -92,7 +92,7 @@ const readFile = pify(fs.readFile);
 export class DicomContentProvider implements TextDocumentContentProvider {
   public async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
     if (!(uri instanceof vscode.Uri)) return '';
-    const path = uri.fsPath;
+    const path = uri.fsPath.replace(/\.dcm-dump$/, '');
     let dataSet: any;
     try {
       const fileContent = await readFile(path);
