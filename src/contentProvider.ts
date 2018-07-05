@@ -109,12 +109,16 @@ export class DicomContentProvider implements TextDocumentContentProvider {
       const element = dataSet.elements[key];
       const tagInfo = findTagInfo(element.tag);
       const vr: string = element.vr || (tagInfo ? tagInfo.vr : undefined);
-      let text = textRepresentationOfElement(dataSet, key, vr);
+      let text: string | undefined = textRepresentationOfElement(
+        dataSet,
+        key,
+        vr
+      );
       entries.push({
         tag: formatTag(element.tag),
         vr,
         tagName: tagInfo ? tagInfo.name : '?',
-        text
+        text: typeof text === 'string' ? text : '<undefined>'
       });
     }
     return Promise.resolve(
