@@ -36,7 +36,7 @@
     },
     "val": {
       "patterns": [
-        { "name": "markup.italic.dicom-dump", "match": "\\<.+\\>" },
+        { "name": "comment.other.dicom-dump", "match": "\\<.+\\>" },
         { "name": "entity.other.dicom-dump", "match": ".+" }
       ]
     }
