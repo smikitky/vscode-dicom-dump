@@ -23,7 +23,7 @@ const formatTag = (tag: string) => {
   return `[${group},${element}]`;
 };
 
-const textRepresentationOfNumberLists = (
+const textRepresentationOfNumberList = (
   dataSet: any,
   key: string,
   accessor: string,
@@ -40,13 +40,8 @@ const textRepresentationOfNumberLists = (
 
 const textRepresentationOfElement = (dataSet: any, key: string, vr: string) => {
   const element = dataSet.elements[key];
-  if (element.items) {
-    // not supported!
-    return '[Sequence]';
-  }
   if (element.fragments) {
-    // not supported!
-    return '[Fragments]';
+    return '<Fragments>';
   }
 
   switch (vr) {
@@ -56,7 +51,7 @@ const textRepresentationOfElement = (dataSet: any, key: string, vr: string) => {
     case 'OF': // Other Float String
       return `<Binary data (${vr}) of length: ${element.length}>`;
     case 'SQ':
-      return '<Sequence of items>';
+      return '<Sequence of items>'; // Not yet supported
     case 'AT': {
       // Attribute Tag
       const group = dataSet.uint16(key, 0);
@@ -66,17 +61,24 @@ const textRepresentationOfElement = (dataSet: any, key: string, vr: string) => {
       return '0x' + groupHexStr + elementHexStr;
     }
     case 'FL':
-      return textRepresentationOfNumberLists(dataSet, key, 'float', 4);
+      return textRepresentationOfNumberList(dataSet, key, 'float', 4);
     case 'FD':
-      return textRepresentationOfNumberLists(dataSet, key, 'double', 8);
+      return textRepresentationOfNumberList(dataSet, key, 'double', 8);
     case 'UL':
-      return textRepresentationOfNumberLists(dataSet, key, 'uint32', 4);
+      return textRepresentationOfNumberList(dataSet, key, 'uint32', 4);
     case 'SL':
-      return textRepresentationOfNumberLists(dataSet, key, 'int32', 4);
+      return textRepresentationOfNumberList(dataSet, key, 'int32', 4);
     case 'US':
-      return textRepresentationOfNumberLists(dataSet, key, 'uint16', 2);
+      return textRepresentationOfNumberList(dataSet, key, 'uint16', 2);
     case 'SS':
-      return textRepresentationOfNumberLists(dataSet, key, 'int16', 2);
+      return textRepresentationOfNumberList(dataSet, key, 'int16', 2);
+    case 'UN': {
+      // "Unknown" VR. We have no clue as to how to represent this.
+      const str = dataSet.string(key);
+      const isAscii = /^[\x20-\x7E]*$/.test(str);
+      if (isAscii) return str;
+      return `<Seemengly binary data (UN) of length: ${element.length}>`;
+    }
     default:
       // string VR
       return dataSet.string(key);
