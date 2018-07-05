@@ -48,6 +48,7 @@
           ".dicom"
         ],
         "aliases": [
+          "DICOM",
           "dcm"
         ]
       },
@@ -55,6 +56,9 @@
         "id": "dicom-dump",
         "extensions": [
           ".dcm-dump"
+        ],
+        "aliases": [
+          "DICOM dump"
         ]
       }
     ],
