@@ -17,22 +17,21 @@ const formatTag = (tag: string) => {
   return `[${group},${element}]`;
 };
 
-const textRepresentationOfNumberList = (
+const numberListToText = (
   dataSet: any,
   key: string,
   accessor: string,
   valueBytes: number
 ) => {
   const numElements = dataSet.elements[key].length / valueBytes;
-  let result = '';
+  const numbers: number[] = [];
   for (let i = 0; i < numElements; i++) {
-    if (i > 0) result += '\\';
-    result += dataSet[accessor](key, i);
+    numbers.push(dataSet[accessor](key, i));
   }
-  return result;
+  return numbers.join('\\');
 };
 
-const textRepresentationOfElement = (dataSet: any, key: string, vr: string) => {
+const elementToText = (dataSet: any, key: string, vr: string) => {
   const element = dataSet.elements[key];
 
   if (element.fragments) {
@@ -56,17 +55,17 @@ const textRepresentationOfElement = (dataSet: any, key: string, vr: string) => {
       return '0x' + groupHexStr + elementHexStr;
     }
     case 'FL':
-      return textRepresentationOfNumberList(dataSet, key, 'float', 4);
+      return numberListToText(dataSet, key, 'float', 4);
     case 'FD':
-      return textRepresentationOfNumberList(dataSet, key, 'double', 8);
+      return numberListToText(dataSet, key, 'double', 8);
     case 'UL':
-      return textRepresentationOfNumberList(dataSet, key, 'uint32', 4);
+      return numberListToText(dataSet, key, 'uint32', 4);
     case 'SL':
-      return textRepresentationOfNumberList(dataSet, key, 'int32', 4);
+      return numberListToText(dataSet, key, 'int32', 4);
     case 'US':
-      return textRepresentationOfNumberList(dataSet, key, 'uint16', 2);
+      return numberListToText(dataSet, key, 'uint16', 2);
     case 'SS':
-      return textRepresentationOfNumberList(dataSet, key, 'int16', 2);
+      return numberListToText(dataSet, key, 'int16', 2);
     case 'UN': {
       // "Unknown" VR. We have no clue as to how to represent this.
       const str = dataSet.string(key);
@@ -139,11 +138,7 @@ export class DicomContentProvider implements TextDocumentContentProvider {
         (tagInfo && tagInfo.forceVr && tagInfo.vr) ||
         element.vr ||
         (tagInfo ? tagInfo.vr : undefined);
-      let text: string | undefined = textRepresentationOfElement(
-        dataSet,
-        key,
-        vr
-      );
+      const text: string | undefined = elementToText(dataSet, key, vr);
       entries.push({
         tag: formatTag(element.tag),
         vr,
