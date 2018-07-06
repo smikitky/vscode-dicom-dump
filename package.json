@@ -25,6 +25,42 @@
   ],
   "main": "./out/extension",
   "contributes": {
+    "configuration": [
+      {
+        "type": "object",
+        "properties": {
+          "dicom.dictionary": {
+            "description": "The list of known DICOM tags that will be used along with standard tags. Each key must be an 8-digit uppercase hex string representing the DICOM group/element.",
+            "type": "object",
+            "patternProperties": {
+              "^[0-9A-F]{8}$": {
+                "type": "object",
+                "properties": {
+                  "vr": {
+                    "description": "Value representation name, such as 'SL'.",
+                    "type": "string",
+                    "pattern": "^[A-Z]{2}$"
+                  },
+                  "name": {
+                    "description": "Element name (camelCase recommended).",
+                    "type": "string"
+                  },
+                  "forceVr": {
+                    "description": "Force this VR type for this element. Use with care.",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "vr",
+                  "name"
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      }
+    ],
     "commands": [
       {
         "command": "dicom.showTags",

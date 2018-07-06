@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { TextDocumentContentProvider } from 'vscode';
 import * as fs from 'fs';
 import * as pify from 'pify';
-import { StandardDataElements, TagInfo } from 'dicom-data-dictionary';
+import { DicomDataElements, TagInfo } from 'dicom-data-dictionary';
 
 interface Entry {
   tag: string;
@@ -96,9 +96,12 @@ const readFile = pify(fs.readFile);
  */
 export class DicomContentProvider implements TextDocumentContentProvider {
   private _parser: any;
-  private _dict!: StandardDataElements;
+  private _standardDict!: DicomDataElements;
+  private _dict!: DicomDataElements;
 
-  private _findTagInfo(tag: string): TagInfo | undefined {
+  private _findTagInfo(
+    tag: string
+  ): (TagInfo & { forceVr?: string }) | undefined {
     const key = tag.substring(1, 9).toUpperCase();
     return this._dict[key];
   }
@@ -107,11 +110,15 @@ export class DicomContentProvider implements TextDocumentContentProvider {
     // We lazy-load large modules here to minimize the performance impact
     if (this._parser) return;
     this._parser = await import('dicom-parser');
-    this._dict = (await import('dicom-data-dictionary')).standardDataElements;
+    this._standardDict = (await import('dicom-data-dictionary')).standardDataElements;
   }
 
   public async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
     await this._loadModules();
+
+    const additionalDict =
+      vscode.workspace.getConfiguration('dicom').get('dictionary') || {};
+    this._dict = Object.assign({}, this._standardDict, additionalDict);
 
     if (!(uri instanceof vscode.Uri)) return '';
     const path = uri.fsPath.replace(/\.dcm-dump$/, '');
@@ -128,7 +135,10 @@ export class DicomContentProvider implements TextDocumentContentProvider {
     for (let key in dataSet.elements) {
       const element = dataSet.elements[key];
       const tagInfo = this._findTagInfo(element.tag);
-      const vr: string = element.vr || (tagInfo ? tagInfo.vr : undefined);
+      const vr: string =
+        (tagInfo && tagInfo.forceVr && tagInfo.vr) ||
+        element.vr ||
+        (tagInfo ? tagInfo.vr : undefined);
       let text: string | undefined = textRepresentationOfElement(
         dataSet,
         key,
