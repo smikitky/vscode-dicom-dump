@@ -6,7 +6,7 @@ A [Visual Studio Code][vsc] (vscode) extension that dumps DICOM tag contents.
 
 ## Usage
 
-![Screenshot](doc/screenshot.png)
+![Screenshot](./doc/screenshot.png)
 
 Right-click on the DICOM file and use the context menu "Show DICOM tags".
 
@@ -17,8 +17,8 @@ Right-click on the DICOM file and use the context menu "Show DICOM tags".
 
 ## Known Issues / Limitations
 
-- Does not (yet) properly support SQ (Sequence of Items) values.
-- Does not work with a virtual file system mounted with `FileSystemProvider`.
+- Does not (yet) properly support `SQ` (Sequence of Items) values.
+- Does not work with remote workspaces mounted with `FileSystemProvider` (blocked by: microsoft/vscode#48034).
 - It's not possible to modify DICOM file.
 
 ## Bugs / PRs
