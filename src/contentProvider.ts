@@ -114,10 +114,12 @@ export class DicomContentProvider implements TextDocumentContentProvider {
 
   public async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
     await this._loadModules();
+    const config = vscode.workspace.getConfiguration('dicom');
 
-    const additionalDict =
-      vscode.workspace.getConfiguration('dicom').get('dictionary') || {};
+    const additionalDict = config.get('dictionary') || {};
     this._dict = Object.assign({}, this._standardDict, additionalDict);
+
+    const showPrivateTags = !!config.get('showPrivateTags');
 
     if (!(uri instanceof vscode.Uri)) return '';
     const path = uri.fsPath.replace(/\.dcm-dump$/, '');
@@ -133,6 +135,11 @@ export class DicomContentProvider implements TextDocumentContentProvider {
     const entries: Entry[] = [];
     for (let key in dataSet.elements) {
       const element = dataSet.elements[key];
+
+      // A tag is private if the group number is odd
+      const isPrivateTag = /[13579bdf]/i.test(element.tag[4]);
+      if (isPrivateTag && !showPrivateTags) continue;
+
       const tagInfo = this._findTagInfo(element.tag);
       const vr: string =
         (tagInfo && tagInfo.forceVr && tagInfo.vr) ||

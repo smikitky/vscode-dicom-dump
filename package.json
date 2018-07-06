@@ -29,6 +29,10 @@
       {
         "type": "object",
         "properties": {
+          "dicom.showPrivateTags": {
+            "description": "Controls the visibility of DICOM private tags. Private tags without specific value representation may not render properly.",
+            "type": "boolean"
+          },
           "dicom.dictionary": {
             "description": "The list of known DICOM tags that will be used along with standard tags. Each key must be an 8-digit uppercase hex string representing the DICOM group/element.",
             "type": "object",

@@ -17,21 +17,26 @@ Right-click on the DICOM file and use the context menu "Show DICOM tags".
 
 ## Configuration
 
-`dicom.dictionary` modifies or adds entries to
-the standard DICOM dictionary. Example:
+- `dicom.showPrivateTags` (default = `false`) controls the
+  visibility of DICOM private tags. Set this to `true` to dump everything.
+  Note that many private tags have 'UN' (unknown) VR type, which means
+  this extension do not know how to format them.
 
-```json
-{
-  "dicom.dictionary": {
-    "01F51247": { "vr": "US", "name": "privateTag1" },
-    "01F51248": { "vr": "DT", "name": "privateTag2", "forceVr": true }
+- `dicom.dictionary` modifies or adds entries to
+  the standard DICOM dictionary. Example:
+
+  ```json
+  {
+    "dicom.dictionary": {
+      "01F51247": { "vr": "US", "name": "privateTag1" },
+      "01F51248": { "vr": "DT", "name": "privateTag2", "forceVr": true }
+    }
   }
-}
-```
+  ```
 
-`forceVr: true` will forcibly overwrite the VR type even if another type is
-explicitly specified in the DICOM file. This may allow you to view
-the contents of some private tags.
+  `forceVr: true` will forcibly overwrite the VR type even if
+  another type is explicitly specified in the DICOM file.
+  This may allow you to view the contents of some private tags.
 
 ## Known Issues / Limitations
 
