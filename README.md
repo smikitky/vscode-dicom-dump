@@ -14,6 +14,8 @@ Right-click on the DICOM file and use the context menu "Show DICOM tags".
 
 - Dumps all DICOM tags in a human-readable format (except binaries).
 - Understands value representation (VRs) of most standard DICOM tags.
+- Supports character encoding conversion for some encodings.
+- 100% JavaScript. Does not require any external binary dependencies like DCMTK.
 
 ## Configuration
 
@@ -40,7 +42,6 @@ Right-click on the DICOM file and use the context menu "Show DICOM tags".
 
 ## Known Issues / Limitations
 
-- Does not understand character encodings yet.
 - Does not work with remote workspaces mounted with `FileSystemProvider` (blocked by: microsoft/vscode#48034).
 - It's not possible to modify DICOM file.
 
