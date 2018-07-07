@@ -14,6 +14,13 @@ export type EncConverter = (input: Buffer) => string;
 export async function createEncConverter(
   charSet: string
 ): Promise<EncConverter | undefined> {
+  if (/IR\s?(87|13)\b/.test(charSet)) {
+    // Japanese ISO-2022-JP (aka "JIS"), including half-width katakana.
+    // Currently iconv-lite does not support this encoding.
+    const jconv = await import('jconv');
+    return buffer => jconv.decode(buffer, 'ISO-2022-JP');
+  }
+
   // Nothing matched.
   return undefined;
 }

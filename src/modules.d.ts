@@ -39,3 +39,5 @@ declare module 'dicom-data-dictionary' {
   }
   export const standardDataElements: DicomDataElements;
 }
+
+declare module 'jconv';

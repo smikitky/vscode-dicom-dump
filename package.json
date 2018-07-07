@@ -132,6 +132,7 @@
   "dependencies": {
     "dicom-data-dictionary": "^0.3.1",
     "dicom-parser": "^1.8.1",
+    "jconv": "^0.1.5",
     "pify": "^3.0.0"
   }
 }
