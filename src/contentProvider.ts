@@ -45,7 +45,8 @@ const numberListToText = (
 function elementToText(
   dataSet: any,
   key: string,
-  vr: string
+  vr: string,
+  rootDataSet: any
 ): string | undefined {
   const element = dataSet.elements[key];
 
@@ -54,14 +55,14 @@ function elementToText(
     const vrs = vr.split('|');
     if (vrs.every(v => ['OB', 'OW', 'OD', 'OF'].indexOf(v) >= 0)) {
       // This is a binary data, anyway, so treat it as such
-      return elementToText(dataSet, key, 'OB');
+      return elementToText(dataSet, key, 'OB', rootDataSet);
     } else if (vrs.every(v => ['US', 'SS'].indexOf(v) >= 0)) {
-      const pixelRepresentation: number = dataSet.uint16('x00280103');
+      const pixelRepresentation: number = rootDataSet.uint16('x00280103');
       switch (pixelRepresentation) {
         case 0:
-          return elementToText(dataSet, key, 'US');
+          return elementToText(dataSet, key, 'US', rootDataSet);
         case 1:
-          return elementToText(dataSet, key, 'SS');
+          return elementToText(dataSet, key, 'SS', rootDataSet);
         default:
           return '<error: could not determine pixel representation>';
       }
@@ -75,6 +76,7 @@ function elementToText(
     case 'OW': // Other Word String
     case 'OD': // Other Double String
     case 'OF': // Other Float String
+    case '??': // VR not provided at all. Should not happen.
       return `<binary data of length: ${element.length}>`;
     case 'SQ':
       // This means the parser failed to recognize the element as a list.
@@ -171,7 +173,7 @@ export default class DicomContentProvider
         const vr: string =
           (tagInfo && tagInfo.forceVr && tagInfo.vr) ||
           element.vr ||
-          (tagInfo ? tagInfo.vr : undefined);
+          (tagInfo ? tagInfo.vr : '??');
 
         const entry: any = {
           depth,
@@ -182,7 +184,7 @@ export default class DicomContentProvider
         if (element.items) {
           // This menas the element WAS parsed as a sequence of items (SQ).
           // We check this not by VR but by the `items` field because
-          // the parsing has been already finished without using any dictionary.
+          // the parsing has been done without using any dictionary.
           const len = element.items.length;
           entries.push({
             ...entry,
@@ -194,7 +196,12 @@ export default class DicomContentProvider
             iterate(item.dataSet, depth + 1);
           });
         } else {
-          const rawText: string | undefined = elementToText(dataSet, key, vr);
+          const rawText: string | undefined = elementToText(
+            dataSet,
+            key,
+            vr,
+            rootDataSet
+          );
           const text =
             typeof rawText === 'string'
               ? rawText.length
