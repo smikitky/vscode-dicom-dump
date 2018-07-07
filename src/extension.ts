@@ -14,7 +14,7 @@ export function activate(context: vscode.ExtensionContext) {
     'dicom.showTags',
     async (uri: vscode.Uri) => {
       if (!(uri instanceof vscode.Uri)) return;
-      const newUri = uri.with({ scheme, path: uri.path + '.dcm-dump' });
+      const newUri = uri.with({ scheme, path: uri.path + '.dcmdump' });
       const doc = await vscode.workspace.openTextDocument(newUri);
       return vscode.window.showTextDocument(doc);
     }

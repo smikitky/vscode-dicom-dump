@@ -95,7 +95,7 @@
       {
         "id": "dicom-dump",
         "extensions": [
-          ".dcm-dump"
+          ".dcmdump"
         ],
         "aliases": [
           "DICOM dump"

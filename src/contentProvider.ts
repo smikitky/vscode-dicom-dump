@@ -220,7 +220,7 @@ export default class DicomContentProvider
     const showPrivateTags = !!config.get('showPrivateTags');
 
     if (!(uri instanceof vscode.Uri)) return '';
-    const path = uri.fsPath.replace(/\.dcm-dump$/, '');
+    const path = uri.fsPath.replace(/\.dcmdump$/, '');
     let rootDataSet: parser.DataSet;
     try {
       const fileContent = await readFile(path);
