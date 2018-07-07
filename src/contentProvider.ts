@@ -6,22 +6,13 @@ import { standardDataElements } from 'dicom-data-dictionary';
 import { DicomDataElements, TagInfo } from 'dicom-data-dictionary';
 import { EncConverter, createEncConverter } from './encConverter';
 
-interface HeadingEntry {
-  depth: number;
-  heading: string;
-}
-
-/** Represents a single line which describes an element. */
-interface ElementEntry {
-  depth: number;
+interface ParsedElement {
   tag: string;
   vr: string;
   tagName: string;
   text: string;
+  sequenceItems?: ParsedElement[][];
 }
-
-/** Represents a single line of final output. */
-type Entry = HeadingEntry | ElementEntry;
 
 function formatTag(tag: string): string {
   const group = tag.substring(1, 5).toUpperCase();
@@ -80,10 +71,12 @@ function elementToText(
     case 'OF': // Other Float String
     case '??': // VR not provided at all. Should not happen.
       return `<binary data of length: ${element.length}>`;
-    case 'SQ':
-      // This means the parser failed to recognize the element as a list.
-      // Should not happen unless VR is forcibly changed.
-      return '<unparsed sequence of items>';
+    case 'SQ': {
+      if (Array.isArray(element.items)) {
+        const len = element.items.length;
+        return `<sequence of ${len} item${len !== 1 ? 's' : ''}>`;
+      } else return '<error: broken sequence>'; // should not happen
+    }
     case 'AT': {
       // Attribute Tag
       const group = dataSet.uint16(key, 0);
@@ -137,6 +130,31 @@ function elementToText(
       // Other string VRs which use ASCII chars, such as DT
       return dataSet.string(key);
   }
+}
+
+function parsedElementsToString(
+  entries: ParsedElement[],
+  depth: number = 0
+): string {
+  return entries
+    .map(e => {
+      const indent = '  '.repeat(depth);
+      const main = `${indent}${e.tag} ${e.vr} ${e.tagName} = ${e.text}`;
+      if (e.sequenceItems) {
+        return (
+          main +
+          '\n' +
+          e.sequenceItems.map((sub, index) => {
+            return (
+              `${indent}  #${index}\n` + parsedElementsToString(sub, depth + 1)
+            );
+          })
+        );
+      } else {
+        return main;
+      }
+    })
+    .join('\n');
 }
 
 const readFile = pify(fs.readFile);
@@ -200,9 +218,8 @@ export default class DicomContentProvider
     const specificCharacterSet = rootDataSet.string('x00080005');
     let encConverter = await this._prepareEncConverter(specificCharacterSet);
 
-    const entries: Entry[] = [];
-
-    const iterate = (dataSet: parser.DataSet, depth: number = 0) => {
+    const readDataSet = (dataSet: parser.DataSet) => {
+      const entries: ParsedElement[] = [];
       const keys = Object.keys(dataSet.elements).sort();
       for (let key of keys) {
         const element = dataSet.elements[key];
@@ -217,55 +234,33 @@ export default class DicomContentProvider
           element.vr ||
           (tagInfo ? tagInfo.vr : '??');
 
-        const entry: any = {
-          depth,
+        const rawText: string | undefined = elementToText(
+          dataSet,
+          key,
+          vr,
+          rootDataSet,
+          encConverter
+        );
+        const text =
+          typeof rawText === 'string'
+            ? rawText.length
+              ? rawText
+              : '<empty string>'
+            : '<undefined>';
+        entries.push({
           tag: formatTag(element.tag),
-          tagName: tagInfo ? tagInfo.name : '?'
-        };
-
-        if (element.items) {
-          // This menas the element WAS parsed as a sequence of items (SQ).
-          // We check this not by VR but by the `items` field because
-          // the parsing has been done without using any dictionary.
-          const len = element.items.length;
-          entries.push({
-            ...entry,
-            vr: 'SQ',
-            text: `<sequence of ${len} item${len !== 1 ? 's' : ''}>`
-          });
-          element.items.forEach((item, index) => {
-            entries.push({ depth: depth + 1, heading: `#${index}` });
-            iterate(item.dataSet, depth + 1);
-          });
-        } else {
-          const rawText: string | undefined = elementToText(
-            dataSet,
-            key,
-            vr,
-            rootDataSet,
-            encConverter
-          );
-          const text =
-            typeof rawText === 'string'
-              ? rawText.length
-                ? rawText
-                : '<empty string>'
-              : '<undefined>';
-          entries.push({ ...entry, vr, text });
-        }
+          tagName: tagInfo ? tagInfo.name : '?',
+          vr,
+          text,
+          sequenceItems: Array.isArray(element.items)
+            ? element.items.map(item => readDataSet(item.dataSet))
+            : undefined
+        });
       }
+      return entries;
     };
 
-    iterate(rootDataSet);
-
-    return Promise.resolve(
-      entries
-        .map(e => {
-          const indent = '  '.repeat(e.depth);
-          if ('heading' in e) return indent + e.heading;
-          return `${indent}${e.tag} ${e.vr} ${e.tagName} = ${e.text}`;
-        })
-        .join('\n')
-    );
+    const parsedElements = readDataSet(rootDataSet);
+    return Promise.resolve(parsedElementsToString(parsedElements, 0));
   }
 }
