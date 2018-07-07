@@ -22,25 +22,25 @@ interface ElementEntry {
 /** Represents a single line of final output. */
 type Entry = HeadingEntry | ElementEntry;
 
-const formatTag = (tag: string) => {
+function formatTag(tag: string): string {
   const group = tag.substring(1, 5).toUpperCase();
   const element = tag.substring(5, 9).toUpperCase();
   return `(${group},${element})`;
-};
+}
 
-const numberListToText = (
+function numberListToText(
   dataSet: parser.DataSet,
   key: string,
   accessor: string,
   valueBytes: number
-) => {
+): string {
   const numElements = dataSet.elements[key].length / valueBytes;
   const numbers: number[] = [];
   for (let i = 0; i < numElements; i++) {
     numbers.push((<any>dataSet)[accessor](key, i) as number);
   }
   return numbers.join('\\');
-};
+}
 
 function elementToText(
   dataSet: parser.DataSet,
