@@ -4,6 +4,7 @@ import * as pify from 'pify';
 import * as parser from 'dicom-parser';
 import { standardDataElements } from 'dicom-data-dictionary';
 import { DicomDataElements, TagInfo } from 'dicom-data-dictionary';
+import { EncConverter, createEncConverter } from './encConverter';
 
 interface HeadingEntry {
   depth: number;
@@ -46,7 +47,8 @@ function elementToText(
   dataSet: parser.DataSet,
   key: string,
   vr: string,
-  rootDataSet: parser.DataSet
+  rootDataSet: parser.DataSet,
+  encConverter: EncConverter
 ): string | undefined {
   const element = dataSet.elements[key];
 
@@ -55,14 +57,14 @@ function elementToText(
     const vrs = vr.split('|');
     if (vrs.every(v => ['OB', 'OW', 'OD', 'OF'].indexOf(v) >= 0)) {
       // This is a binary data, anyway, so treat it as such
-      return elementToText(dataSet, key, 'OB', rootDataSet);
+      return elementToText(dataSet, key, 'OB', rootDataSet, encConverter);
     } else if (vrs.every(v => ['US', 'SS'].indexOf(v) >= 0)) {
       const pixelRepresentation: number = rootDataSet.uint16('x00280103');
       switch (pixelRepresentation) {
         case 0:
-          return elementToText(dataSet, key, 'US', rootDataSet);
+          return elementToText(dataSet, key, 'US', rootDataSet, encConverter);
         case 1:
-          return elementToText(dataSet, key, 'SS', rootDataSet);
+          return elementToText(dataSet, key, 'SS', rootDataSet, encConverter);
         default:
           return '<error: could not determine pixel representation>';
       }
@@ -117,8 +119,22 @@ function elementToText(
       }
       return `<seemengly binary data (UN) of length: ${element.length}>`;
     }
+    case 'SH':
+    case 'LO':
+    case 'ST':
+    case 'LT':
+    case 'PN':
+    case 'UT': {
+      // These are subject to Specific Character Set (0008,0005)
+      const bin = Buffer.from(
+        dataSet.byteArray.buffer,
+        element.dataOffset,
+        element.length
+      );
+      return encConverter(bin);
+    }
     default:
-      // string VR
+      // Other string VRs which use ASCII chars, such as DT
       return dataSet.string(key);
   }
 }
@@ -140,6 +156,26 @@ export default class DicomContentProvider
     return this._dict[key];
   }
 
+  private async _prepareEncConverter(charSet: string): Promise<EncConverter> {
+    const defaultEncConverter: EncConverter = buf => buf.toString('utf8');
+    if (!charSet) {
+      // Empty tag means only 7-bit ASCII characters will be used.
+      return defaultEncConverter;
+    }
+
+    const converter = await createEncConverter(charSet);
+    if (converter) {
+      // Found a good converter
+      return converter;
+    }
+
+    vscode.window.showInformationMessage(
+      `The character set ${charSet} is not supported. ` +
+        `Strings may be broken.`
+    );
+    return defaultEncConverter;
+  }
+
   public async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
     const config = vscode.workspace.getConfiguration('dicom');
 
@@ -159,6 +195,11 @@ export default class DicomContentProvider
       await vscode.window.showErrorMessage('Error opening DICOM file.');
       return '';
     }
+
+    // Prepares a character encoding converter based on Specific Character Set.
+    const specificCharacterSet = rootDataSet.string('x00080005');
+    let encConverter = await this._prepareEncConverter(specificCharacterSet);
+
     const entries: Entry[] = [];
 
     const iterate = (dataSet: parser.DataSet, depth: number = 0) => {
@@ -201,7 +242,8 @@ export default class DicomContentProvider
             dataSet,
             key,
             vr,
-            rootDataSet
+            rootDataSet,
+            encConverter
           );
           const text =
             typeof rawText === 'string'
