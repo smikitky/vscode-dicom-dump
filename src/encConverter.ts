@@ -34,7 +34,14 @@ const encodingMap: AvailableConverter[] = [
   {
     // ISO 8859-1 (aka "Latin-1")
     pattern: /IR\s?100\b/,
-    converter: iconvLite('latin1')
+    converter: iconvLite('iso-8859-1')
+  },
+  {
+    // UTF-8 encoding
+    pattern: /IR\s?192\b/,
+    converter: async () => {
+      return buffer => buffer.toString('utf8');
+    }
   },
   {
     // Japanese ISO-2022-JP (aka "JIS"), including half-width katakana.
@@ -46,6 +53,9 @@ const encodingMap: AvailableConverter[] = [
     }
   }
 ];
+
+// cf:
+// https://github.com/InsightSoftwareConsortium/DCMTK/blob/master/dcmdata/libsrc/dcspchrs.cc#L168
 
 /**
  * Examines the value of SpecificCharacterSet (0008,0005) and
