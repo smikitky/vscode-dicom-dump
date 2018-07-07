@@ -4,12 +4,22 @@ import * as fs from 'fs';
 import * as pify from 'pify';
 import { DicomDataElements, TagInfo } from 'dicom-data-dictionary';
 
-interface Entry {
+interface HeadingEntry {
+  depth: number;
+  heading: string;
+}
+
+/** Represents a single line which describes an element. */
+interface ElementEntry {
+  depth: number;
   tag: string;
   vr: string;
   tagName: string;
   text: string;
 }
+
+/** Represents a single line of final output. */
+type Entry = HeadingEntry | ElementEntry;
 
 const formatTag = (tag: string) => {
   const group = tag.substring(1, 5).toUpperCase();
@@ -123,43 +133,74 @@ export class DicomContentProvider implements TextDocumentContentProvider {
 
     if (!(uri instanceof vscode.Uri)) return '';
     const path = uri.fsPath.replace(/\.dcm-dump$/, '');
-    let dataSet: any;
+    let rootDataSet: any;
     try {
       const fileContent = await readFile(path);
       const ba = new Uint8Array(fileContent.buffer);
-      dataSet = this._parser.parseDicom(ba);
+      rootDataSet = this._parser.parseDicom(ba);
     } catch (e) {
       await vscode.window.showErrorMessage('Error opening DICOM file.');
       return '';
     }
     const entries: Entry[] = [];
-    for (let key in dataSet.elements) {
-      const element = dataSet.elements[key];
 
-      // A tag is private if the group number is odd
-      const isPrivateTag = /[13579bdf]/i.test(element.tag[4]);
-      if (isPrivateTag && !showPrivateTags) continue;
+    const iterate = (dataSet: any, depth: number = 0) => {
+      for (let key in dataSet.elements) {
+        const element = dataSet.elements[key];
 
-      const tagInfo = this._findTagInfo(element.tag);
-      const vr: string =
-        (tagInfo && tagInfo.forceVr && tagInfo.vr) ||
-        element.vr ||
-        (tagInfo ? tagInfo.vr : undefined);
-      const text: string | undefined = elementToText(dataSet, key, vr);
-      entries.push({
-        tag: formatTag(element.tag),
-        vr,
-        tagName: tagInfo ? tagInfo.name : '?',
-        text:
-          typeof text === 'string'
-            ? text.length
-              ? text
-              : '<empty string>'
-            : '<undefined>'
-      });
-    }
+        // A tag is private if the group number is odd
+        const isPrivateTag = /[13579bdf]/i.test(element.tag[4]);
+        if (isPrivateTag && !showPrivateTags) continue;
+
+        const tagInfo = this._findTagInfo(element.tag);
+        const vr: string =
+          (tagInfo && tagInfo.forceVr && tagInfo.vr) ||
+          element.vr ||
+          (tagInfo ? tagInfo.vr : undefined);
+
+        const entry: any = {
+          depth,
+          tag: formatTag(element.tag),
+          tagName: tagInfo ? tagInfo.name : '?'
+        };
+
+        if (element.items) {
+          // This menas the element WAS parsed as a sequence of items (SQ).
+          // We check this not by VR but by the `items` field because
+          // the parsing has been already finished without using any dictionary.
+          const len = element.items.length;
+          entries.push({
+            ...entry,
+            vr: 'SQ',
+            text: `<sequence of ${len} item${len !== 1 ? 's' : ''}>`
+          });
+          element.items.forEach((item: any, index: number) => {
+            entries.push({ depth: depth + 1, heading: `#${index}` });
+            iterate(item.dataSet, depth + 1);
+          });
+        } else {
+          const rawText: string | undefined = elementToText(dataSet, key, vr);
+          const text =
+            typeof rawText === 'string'
+              ? rawText.length
+                ? rawText
+                : '<empty string>'
+              : '<undefined>';
+          entries.push({ ...entry, vr, text });
+        }
+      }
+    };
+
+    iterate(rootDataSet);
+
     return Promise.resolve(
-      entries.map(e => `${e.tag} ${e.vr} ${e.tagName} = ${e.text}`).join('\n')
+      entries
+        .map(e => {
+          const indent = '  '.repeat(e.depth);
+          if ('heading' in e) return indent + e.heading;
+          return `${indent}${e.tag} ${e.vr} ${e.tagName} = ${e.text}`;
+        })
+        .join('\n')
     );
   }
 }

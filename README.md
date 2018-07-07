@@ -40,7 +40,6 @@ Right-click on the DICOM file and use the context menu "Show DICOM tags".
 
 ## Known Issues / Limitations
 
-- Does not (yet) properly support `SQ` (Sequence of Items) values.
 - Does not work with remote workspaces mounted with `FileSystemProvider` (blocked by: microsoft/vscode#48034).
 - It's not possible to modify DICOM file.
 
