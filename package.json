@@ -68,13 +68,22 @@
     "commands": [
       {
         "command": "dicom.showTags",
-        "title": "DICOM: Show DICOM tags"
+        "title": "DICOM: Dump DICOM tags"
+      },
+      {
+        "command": "dicom.dumpAsJson",
+        "title": "DICOM: Dump DICOM tags as JSON"
       }
     ],
     "menus": {
       "explorer/context": [
         {
           "command": "dicom.showTags",
+          "group": "dicom",
+          "when": "resourceLangId == dicom"
+        },
+        {
+          "command": "dicom.dumpAsJson",
           "group": "dicom",
           "when": "resourceLangId == dicom"
         }

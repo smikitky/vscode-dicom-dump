@@ -10,22 +10,25 @@ export function activate(context: vscode.ExtensionContext) {
     new ContentProviderWrapper()
   );
 
-  const r2 = vscode.commands.registerCommand(
-    'dicom.showTags',
-    async (uri: vscode.Uri) => {
+  const open = (ext: string) => {
+    return async (uri: vscode.Uri) => {
       if (!(uri instanceof vscode.Uri)) return;
-      const newUri = uri.with({ scheme, path: uri.path + '.dcmdump' });
+      const newUri = uri.with({ scheme, path: uri.path + '.' + ext });
       const doc = await vscode.workspace.openTextDocument(newUri);
       return vscode.window.showTextDocument(doc);
-    }
-  );
+    };
+  };
 
-  const r3 = vscode.languages.registerHoverProvider(
+  const r2 = vscode.commands.registerCommand('dicom.showTags', open('dcmdump'));
+
+  const r3 = vscode.commands.registerCommand('dicom.dumpAsJson', open('json'));
+
+  const r4 = vscode.languages.registerHoverProvider(
     { language: 'dicom-dump' },
     new DicomHoverProvider()
   );
 
-  context.subscriptions.push(r1, r2, r3);
+  context.subscriptions.push(r1, r2, r3, r4);
 }
 
 // export function deactivate() {}

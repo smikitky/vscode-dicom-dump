@@ -11,7 +11,7 @@ const readFile = pify(fs.readFile);
 interface ParsedElement {
   tag: string; // like '(0008,0060)'
   vr: string; // like 'CS'
-  tagName: string; // like 'modality'
+  name: string; // like 'modality'
   text: string; // like 'MR'
   sequenceItems?: ParsedElement[][]; // Only used for 'SQ' element
 }
@@ -158,7 +158,7 @@ function parsedElementsToString(
   return elements
     .map(e => {
       const indent = '  '.repeat(depth);
-      const main = `${indent}${e.tag} ${e.vr} ${e.tagName} = ${e.text}`;
+      const main = `${indent}${e.tag} ${e.vr} ${e.name} = ${e.text}`;
       if (e.sequenceItems) {
         return (
           main +
@@ -220,7 +220,8 @@ export default class DicomContentProvider
     const showPrivateTags = !!config.get('showPrivateTags');
 
     if (!(uri instanceof vscode.Uri)) return '';
-    const path = uri.fsPath.replace(/\.dcmdump$/, '');
+    const dumpMode = /\.dcmdump$/.test(uri.fsPath) ? 'dcmdump' : 'json';
+    const path = uri.fsPath.replace(/\.(dcmdump|json)$/, '');
     let rootDataSet: parser.DataSet;
     try {
       const fileContent = await readFile(path);
@@ -266,7 +267,7 @@ export default class DicomContentProvider
             : '<undefined>';
         entries.push({
           tag: formatTag(element.tag),
-          tagName: tagInfo ? tagInfo.name : '?',
+          name: tagInfo ? tagInfo.name : '?',
           vr,
           text,
           sequenceItems: Array.isArray(element.items)
@@ -278,6 +279,10 @@ export default class DicomContentProvider
     };
 
     const parsedElements = readDataSet(rootDataSet);
-    return Promise.resolve(parsedElementsToString(parsedElements, 0));
+    return Promise.resolve(
+      dumpMode === 'dcmdump'
+        ? parsedElementsToString(parsedElements, 0)
+        : JSON.stringify(parsedElements, null, '  ')
+    );
   }
 }
