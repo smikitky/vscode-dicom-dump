@@ -162,7 +162,8 @@ export default class DicomContentProvider
     const entries: Entry[] = [];
 
     const iterate = (dataSet: parser.DataSet, depth: number = 0) => {
-      for (let key in dataSet.elements) {
+      const keys = Object.keys(dataSet.elements).sort();
+      for (let key of keys) {
         const element = dataSet.elements[key];
 
         // A tag is private if the group number is odd
