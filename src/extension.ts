@@ -1,6 +1,7 @@
 'use strict';
 import * as vscode from 'vscode';
 import { DicomContentProvider } from './contentProvider';
+import DicomHoverProvider from './hoverProvider';
 
 const scheme = 'dicom-dump';
 
@@ -21,7 +22,12 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  context.subscriptions.push(r1, r2);
+  const r3 = vscode.languages.registerHoverProvider(
+    { language: 'dicom-dump' },
+    new DicomHoverProvider()
+  );
+
+  context.subscriptions.push(r1, r2, r3);
 }
 
 // export function deactivate() {}
