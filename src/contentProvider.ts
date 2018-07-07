@@ -42,21 +42,44 @@ const numberListToText = (
   return numbers.join('\\');
 };
 
-const elementToText = (dataSet: any, key: string, vr: string) => {
+function elementToText(
+  dataSet: any,
+  key: string,
+  vr: string
+): string | undefined {
   const element = dataSet.elements[key];
 
-  if (element.fragments) {
-    return '<fragments>';
+  if (vr.indexOf('|') >= 0) {
+    // This means the true VR type depends on other DICOM element.
+    const vrs = vr.split('|');
+    if (vrs.every(v => ['OB', 'OW', 'OD', 'OF'].indexOf(v) >= 0)) {
+      // This is a binary data, anyway, so treat it as such
+      return elementToText(dataSet, key, 'OB');
+    } else if (vrs.every(v => ['US', 'SS'].indexOf(v) >= 0)) {
+      const pixelRepresentation: number = dataSet.uint16('x00280103');
+      switch (pixelRepresentation) {
+        case 0:
+          return elementToText(dataSet, key, 'US');
+        case 1:
+          return elementToText(dataSet, key, 'SS');
+        default:
+          return '<error: could not determine pixel representation>';
+      }
+    } else {
+      return '<error: could not guess VR>';
+    }
   }
 
   switch (vr) {
-    case 'OB': // Other byte String
+    case 'OB': // Other Byte String
     case 'OW': // Other Word String
     case 'OD': // Other Double String
     case 'OF': // Other Float String
-      return `<binary data (${vr}) of length: ${element.length}>`;
+      return `<binary data of length: ${element.length}>`;
     case 'SQ':
-      return '<sequence of items>'; // Not yet supported
+      // This means the parser failed to recognize the element as a list.
+      // Should not happen unless VR is forcibly changed.
+      return '<unparsed sequence of items>';
     case 'AT': {
       // Attribute Tag
       const group = dataSet.uint16(key, 0);
@@ -96,7 +119,7 @@ const elementToText = (dataSet: any, key: string, vr: string) => {
       // string VR
       return dataSet.string(key);
   }
-};
+}
 
 const readFile = pify(fs.readFile);
 
