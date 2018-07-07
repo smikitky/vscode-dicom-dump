@@ -29,7 +29,7 @@ const formatTag = (tag: string) => {
 };
 
 const numberListToText = (
-  dataSet: any,
+  dataSet: parser.DataSet,
   key: string,
   accessor: string,
   valueBytes: number
@@ -37,16 +37,16 @@ const numberListToText = (
   const numElements = dataSet.elements[key].length / valueBytes;
   const numbers: number[] = [];
   for (let i = 0; i < numElements; i++) {
-    numbers.push(dataSet[accessor](key, i));
+    numbers.push((<any>dataSet)[accessor](key, i) as number);
   }
   return numbers.join('\\');
 };
 
 function elementToText(
-  dataSet: any,
+  dataSet: parser.DataSet,
   key: string,
   vr: string,
-  rootDataSet: any
+  rootDataSet: parser.DataSet
 ): string | undefined {
   const element = dataSet.elements[key];
 
@@ -150,7 +150,7 @@ export default class DicomContentProvider
 
     if (!(uri instanceof vscode.Uri)) return '';
     const path = uri.fsPath.replace(/\.dcm-dump$/, '');
-    let rootDataSet: any;
+    let rootDataSet: parser.DataSet;
     try {
       const fileContent = await readFile(path);
       const ba = new Uint8Array(fileContent.buffer);
@@ -161,7 +161,7 @@ export default class DicomContentProvider
     }
     const entries: Entry[] = [];
 
-    const iterate = (dataSet: any, depth: number = 0) => {
+    const iterate = (dataSet: parser.DataSet, depth: number = 0) => {
       for (let key in dataSet.elements) {
         const element = dataSet.elements[key];
 
@@ -191,7 +191,7 @@ export default class DicomContentProvider
             vr: 'SQ',
             text: `<sequence of ${len} item${len !== 1 ? 's' : ''}>`
           });
-          element.items.forEach((item: any, index: number) => {
+          element.items.forEach((item, index) => {
             entries.push({ depth: depth + 1, heading: `#${index}` });
             iterate(item.dataSet, depth + 1);
           });
