@@ -228,7 +228,9 @@ export default class DicomContentProvider
       const ba = new Uint8Array(fileContent.buffer);
       rootDataSet = parser.parseDicom(ba);
     } catch (e) {
-      await vscode.window.showErrorMessage('Error opening DICOM file.');
+      vscode.window.showErrorMessage(
+        'Error opening DICOM file. ' + (typeof e === 'string' ? e : e.message)
+      );
       return '';
     }
 
