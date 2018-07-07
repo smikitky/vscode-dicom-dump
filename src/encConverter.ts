@@ -27,6 +27,28 @@ const iconvLite: (
   };
 };
 
+const convertJapanesePn = (buffer: Buffer, charSet: string, jconv: any) => {
+  const map: { [key: string]: (buffer: Buffer) => string } = {
+    'IR 6': b => b.toString('utf8'),
+    'IR 13': b => jconv.decode(b, 'sjis'),
+    'IR 87': b => jconv.decode(b, 'iso-2022-jp')
+  };
+  const charSets = charSet.split('\\').map(s => s.trim());
+  if (charSets[0] === '') charSets[0] = 'ISO 2022 IR 6';
+  const components = buffer.toString('binary').split('=');
+
+  return components
+    .map((component, index) => {
+      const cs =
+        index < charSets.length
+          ? charSets[index]
+          : charSets[charSets.length - 1];
+      const enc = Object.keys(map).find(k => cs.indexOf(k) >= 0) || 'IR 6';
+      return map[enc](Buffer.from(component, 'binary'));
+    })
+    .join('=');
+};
+
 /**
  * Mapping of "specific character set defined terms" and EncConverter.
  */
@@ -36,9 +58,14 @@ const encodingMap: AvailableConverter[] = [
     pattern: /IR\s?(87|13)\b/,
     converter: async charSet => {
       // Currently iconv-lite does not support this encoding.
+      // ISO-IR 13 is rarely-used 7-bit hankaku katakana.
+      const csValues = charSet.split('\\').map(s => s.trim());
+      if (csValues[0] === '') csValues[0] = 'ISO-IR 6';
+
       const jconv = await import('jconv');
       return (buffer, vr) => {
-        return jconv.decode(buffer, 'ISO-2022-JP');
+        if (vr !== 'PN') return jconv.decode(buffer, 'ISO-2022-JP');
+        return convertJapanesePn(buffer, charSet, jconv);
       };
     }
   },
@@ -74,7 +101,6 @@ export async function createEncConverter(
       return await item.converter(charSet);
     }
   }
-
-  // Nothing matched.
+  // None matched, meaning some unknown encoding has been specified
   return undefined;
 }

@@ -138,7 +138,7 @@ function elementToText(
         element.dataOffset,
         element.length
       );
-      return encConverter(bin);
+      return encConverter(bin, vr);
     }
     default:
       // Other string VRs which use ASCII chars, such as DT
