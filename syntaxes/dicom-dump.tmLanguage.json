@@ -12,12 +12,12 @@
       "patterns": [
         {
           "match":
-            "^\\s*(\\([0-9A-F]{4}\\,[0-9A-F]{4}\\)) (..) (\\w+|\\?) ?= ?(.*)",
+            "^\\s*(\\([0-9A-F]{4}\\,[0-9A-F]{4}\\)) (..(\\|..)*) (\\w+|\\?) ?= ?(.*)",
           "captures": {
             "1": { "patterns": [{ "include": "#tag" }] },
             "2": { "patterns": [{ "include": "#vr" }] },
-            "3": { "patterns": [{ "include": "#name" }] },
-            "4": { "patterns": [{ "include": "#val" }] }
+            "4": { "patterns": [{ "include": "#name" }] },
+            "5": { "patterns": [{ "include": "#val" }] }
           }
         }
       ]
