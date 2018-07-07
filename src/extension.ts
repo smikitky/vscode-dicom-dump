@@ -1,15 +1,13 @@
 'use strict';
 import * as vscode from 'vscode';
-import { DicomContentProvider } from './contentProvider';
 import DicomHoverProvider from './hoverProvider';
 
 const scheme = 'dicom-dump';
 
 export function activate(context: vscode.ExtensionContext) {
-  const provider = new DicomContentProvider();
   const r1 = vscode.workspace.registerTextDocumentContentProvider(
     scheme,
-    provider
+    new ContentProviderWrapper()
   );
 
   const r2 = vscode.commands.registerCommand(
@@ -31,3 +29,25 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // export function deactivate() {}
+
+/**
+ * Wraps the actual DicomContentProvider in order to load
+ * the actual big module as late as possible.
+ */
+class ContentProviderWrapper implements vscode.TextDocumentContentProvider {
+  private _provider!: vscode.TextDocumentContentProvider;
+
+  public async provideTextDocumentContent(
+    uri: vscode.Uri,
+    token: vscode.CancellationToken
+  ): Promise<string> {
+    if (!this._provider) {
+      const DicomContentProvider = (await import('./contentProvider')).default;
+      this._provider = new DicomContentProvider();
+    }
+    return (await this._provider.provideTextDocumentContent(
+      uri,
+      token
+    )) as string;
+  }
+}

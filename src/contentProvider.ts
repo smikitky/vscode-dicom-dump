@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
-import { TextDocumentContentProvider } from 'vscode';
 import * as fs from 'fs';
 import * as pify from 'pify';
+import * as parser from 'dicom-parser';
+import { standardDataElements } from 'dicom-data-dictionary';
 import { DicomDataElements, TagInfo } from 'dicom-data-dictionary';
 
 interface HeadingEntry {
@@ -103,9 +104,8 @@ const readFile = pify(fs.readFile);
  * DicomContentProvider is responsible for generating a virtual document
  * that contains the DICOM tags.
  */
-export class DicomContentProvider implements TextDocumentContentProvider {
-  private _parser: any;
-  private _standardDict!: DicomDataElements;
+export default class DicomContentProvider
+  implements vscode.TextDocumentContentProvider {
   private _dict!: DicomDataElements;
 
   private _findTagInfo(
@@ -115,19 +115,11 @@ export class DicomContentProvider implements TextDocumentContentProvider {
     return this._dict[key];
   }
 
-  private async _loadModules() {
-    // We lazy-load large modules here to minimize the performance impact
-    if (this._parser) return;
-    this._parser = await import('dicom-parser');
-    this._standardDict = (await import('dicom-data-dictionary')).standardDataElements;
-  }
-
   public async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
-    await this._loadModules();
     const config = vscode.workspace.getConfiguration('dicom');
 
     const additionalDict = config.get('dictionary') || {};
-    this._dict = Object.assign({}, this._standardDict, additionalDict);
+    this._dict = Object.assign({}, standardDataElements, additionalDict);
 
     const showPrivateTags = !!config.get('showPrivateTags');
 
@@ -137,7 +129,7 @@ export class DicomContentProvider implements TextDocumentContentProvider {
     try {
       const fileContent = await readFile(path);
       const ba = new Uint8Array(fileContent.buffer);
-      rootDataSet = this._parser.parseDicom(ba);
+      rootDataSet = parser.parseDicom(ba);
     } catch (e) {
       await vscode.window.showErrorMessage('Error opening DICOM file.');
       return '';
