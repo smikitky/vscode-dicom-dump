@@ -246,6 +246,9 @@ export default class DicomContentProvider
         const isPrivateTag = /[13579bdf]/i.test(element.tag[4]);
         if (isPrivateTag && !showPrivateTags) continue;
 
+        // "Item delimitation" tag in a sequence
+        if (key === 'xfffee00d') continue;
+
         const tagInfo = this._findTagInfo(element.tag);
         const vr: string =
           (tagInfo && tagInfo.forceVr && tagInfo.vr) ||
