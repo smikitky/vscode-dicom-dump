@@ -1,19 +1,25 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import * as pify from 'pify';
+import * as pify from 'pify'; // Promisify
 import * as parser from 'dicom-parser';
 import { standardDataElements } from 'dicom-data-dictionary';
 import { DicomDataElements, TagInfo } from 'dicom-data-dictionary';
 import { EncConverter, createEncConverter } from './encConverter';
 
+const readFile = pify(fs.readFile);
+
 interface ParsedElement {
-  tag: string;
-  vr: string;
-  tagName: string;
-  text: string;
-  sequenceItems?: ParsedElement[][];
+  tag: string; // like '(0008,0060)'
+  vr: string; // like 'CS'
+  tagName: string; // like 'modality'
+  text: string; // like 'MR'
+  sequenceItems?: ParsedElement[][]; // Only used for 'SQ' element
 }
 
+/**
+ * Converts tag key into more familiar format like `(0008,0060)`
+ * @param tag dicom-parser's tag string like 'x00080060'
+ */
 function formatTag(tag: string): string {
   const group = tag.substring(1, 5).toUpperCase();
   const element = tag.substring(5, 9).toUpperCase();
@@ -26,6 +32,8 @@ function numberListToText(
   accessor: string,
   valueBytes: number
 ): string {
+  // Each numerical value field may contain more than one number value
+  // due to the value multiplicity (VM) mechanism.
   const numElements = dataSet.elements[key].length / valueBytes;
   const numbers: number[] = [];
   for (let i = 0; i < numElements; i++) {
@@ -60,9 +68,18 @@ function elementToText(
           return '<error: could not determine pixel representation>';
       }
     } else {
-      return '<error: could not guess VR>';
+      return '<error: could not guess VR of this tag>';
     }
   }
+
+  const asHexDump = () => {
+    const bin = Buffer.from(
+      dataSet.byteArray.buffer,
+      element.dataOffset,
+      element.length
+    );
+    return `<bin: 0x${bin.toString('hex')}>`;
+  };
 
   switch (vr) {
     case 'OB': // Other Byte String
@@ -70,7 +87,9 @@ function elementToText(
     case 'OD': // Other Double String
     case 'OF': // Other Float String
     case '??': // VR not provided at all. Should not happen.
-      return `<binary data of length: ${element.length}>`;
+      return element.length <= 16
+        ? asHexDump()
+        : `<binary data of length: ${element.length}>`;
     case 'SQ': {
       if (Array.isArray(element.items)) {
         const len = element.items.length;
@@ -98,19 +117,14 @@ function elementToText(
     case 'SS':
       return numberListToText(dataSet, key, 'int16', 2);
     case 'UN': {
-      // "Unknown" VR. We have no clue as to how to represent this.
+      // "Unknown" VR. We do not know how to stringify this value,
+      // but tries to interpret as an ASCII string.
       const str = dataSet.string(key);
       const isAscii = /^[\x20-\x7E]+$/.test(str);
       if (isAscii) return str;
-      if (element.length <= 16) {
-        const bin = Buffer.from(
-          dataSet.byteArray.buffer,
-          element.dataOffset,
-          element.length
-        );
-        return `<bin: 0x${bin.toString('hex')}>`;
-      }
-      return `<seemengly binary data (UN) of length: ${element.length}>`;
+      return element.length <= 16
+        ? asHexDump()
+        : `<seemengly binary data (UN) of length: ${element.length}>`;
     }
     case 'SH':
     case 'LO':
@@ -132,11 +146,16 @@ function elementToText(
   }
 }
 
+/**
+ * Transforms the parsed elements into indented text.
+ * @param elements
+ * @param depth
+ */
 function parsedElementsToString(
-  entries: ParsedElement[],
+  elements: ParsedElement[],
   depth: number = 0
 ): string {
-  return entries
+  return elements
     .map(e => {
       const indent = '  '.repeat(depth);
       const main = `${indent}${e.tag} ${e.vr} ${e.tagName} = ${e.text}`;
@@ -156,8 +175,6 @@ function parsedElementsToString(
     })
     .join('\n');
 }
-
-const readFile = pify(fs.readFile);
 
 /**
  * DicomContentProvider is responsible for generating a virtual document
