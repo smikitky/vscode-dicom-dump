@@ -24,7 +24,7 @@ type Entry = HeadingEntry | ElementEntry;
 const formatTag = (tag: string) => {
   const group = tag.substring(1, 5).toUpperCase();
   const element = tag.substring(5, 9).toUpperCase();
-  return `[${group},${element}]`;
+  return `(${group},${element})`;
 };
 
 const numberListToText = (
