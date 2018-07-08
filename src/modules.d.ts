@@ -9,7 +9,7 @@ declare module 'dicom-parser' {
   }
 
   interface NumberAccessor {
-    (key: string, index?: number): number;
+    (key: string, index?: number): number | undefined;
   }
 
   export interface DataSet {
@@ -20,7 +20,7 @@ declare module 'dicom-parser' {
     int32: NumberAccessor;
     uint16: NumberAccessor;
     int16: NumberAccessor;
-    string: (key: string) => string;
+    string: (key: string) => string | undefined;
     byteArray: Uint8Array;
   }
 

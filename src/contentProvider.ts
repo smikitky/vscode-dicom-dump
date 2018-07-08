@@ -12,7 +12,8 @@ interface ParsedElement {
   tag: string; // like '(0008,0060)'
   vr: string; // like 'CS'
   name: string; // like 'modality'
-  text: string; // like 'MR'
+  desc?: string; // like 'binary data of length: 2'
+  text?: string; // like 'MR'
   sequenceItems?: ParsedElement[][]; // Only used for 'SQ' element
 }
 
@@ -31,15 +32,16 @@ function numberListToText(
   key: string,
   accessor: string,
   valueBytes: number
-): string {
+): { desc?: string; text?: string } {
   // Each numerical value field may contain more than one number value
   // due to the value multiplicity (VM) mechanism.
   const numElements = dataSet.elements[key].length / valueBytes;
+  if (!numElements) return { desc: 'empty value' };
   const numbers: number[] = [];
   for (let i = 0; i < numElements; i++) {
     numbers.push((<any>dataSet)[accessor](key, i) as number);
   }
-  return numbers.join('\\');
+  return { text: numbers.join('\\') };
 }
 
 function elementToText(
@@ -48,7 +50,7 @@ function elementToText(
   vr: string,
   rootDataSet: parser.DataSet,
   encConverter: EncConverter
-): string | undefined {
+): { desc?: string; text?: string } {
   const element = dataSet.elements[key];
 
   if (vr.indexOf('|') >= 0) {
@@ -58,17 +60,17 @@ function elementToText(
       // This is a binary data, anyway, so treat it as such
       return elementToText(dataSet, key, 'OB', rootDataSet, encConverter);
     } else if (vrs.every(v => ['US', 'SS'].indexOf(v) >= 0)) {
-      const pixelRepresentation: number = rootDataSet.uint16('x00280103');
+      const pixelRepresentation = rootDataSet.uint16('x00280103');
       switch (pixelRepresentation) {
         case 0:
           return elementToText(dataSet, key, 'US', rootDataSet, encConverter);
         case 1:
           return elementToText(dataSet, key, 'SS', rootDataSet, encConverter);
         default:
-          return '<error: could not determine pixel representation>';
+          return { desc: 'error: could not determine pixel representation' };
       }
     } else {
-      return '<error: could not guess VR of this tag>';
+      return { desc: 'error: could not guess VR of this tag' };
     }
   }
 
@@ -78,7 +80,7 @@ function elementToText(
       element.dataOffset,
       element.length
     );
-    return `<bin: 0x${bin.toString('hex')}>`;
+    return `bin: 0x${bin.toString('hex')}`;
   };
 
   switch (vr) {
@@ -88,21 +90,21 @@ function elementToText(
     case 'OF': // Other Float String
     case '??': // VR not provided at all. Should not happen.
       return element.length <= 16
-        ? asHexDump()
-        : `<binary data of length: ${element.length}>`;
+        ? { desc: asHexDump() }
+        : { desc: `binary data of length: ${element.length}` };
     case 'SQ': {
       if (Array.isArray(element.items)) {
         const len = element.items.length;
-        return `<sequence of ${len} item${len !== 1 ? 's' : ''}>`;
-      } else return '<error: broken sequence>'; // should not happen
+        return { desc: `sequence of ${len} item${len !== 1 ? 's' : ''}` };
+      } else return { desc: 'error: broken sequence' }; // should not happen
     }
     case 'AT': {
       // Attribute Tag
-      const group = dataSet.uint16(key, 0);
+      const group = dataSet.uint16(key, 0) as number;
       const groupHexStr = ('0000' + group.toString(16)).substr(-4);
-      const element = dataSet.uint16(key, 1);
+      const element = dataSet.uint16(key, 1) as number;
       const elementHexStr = ('0000' + element.toString(16)).substr(-4);
-      return '0x' + groupHexStr + elementHexStr;
+      return { text: '0x' + groupHexStr + elementHexStr };
     }
     case 'FL':
       return numberListToText(dataSet, key, 'float', 4);
@@ -120,11 +122,11 @@ function elementToText(
       // "Unknown" VR. We do not know how to stringify this value,
       // but tries to interpret as an ASCII string.
       const str = dataSet.string(key);
-      const isAscii = /^[\x20-\x7E]+$/.test(str);
-      if (isAscii) return str;
+      const isAscii = typeof str === 'string' && /^[\x20-\x7E]+$/.test(str);
+      if (isAscii) return { text: str };
       return element.length <= 16
-        ? asHexDump()
-        : `<seemengly binary data (UN) of length: ${element.length}>`;
+        ? { desc: asHexDump() }
+        : { desc: `seemengly binary data (UN) of length: ${element.length}` };
     }
     case 'SH':
     case 'LO':
@@ -138,11 +140,15 @@ function elementToText(
         element.dataOffset,
         element.length
       );
-      return encConverter(bin, vr);
+      return { text: encConverter(bin, vr) };
     }
-    default:
+    default: {
       // Other string VRs which use ASCII chars, such as DT
-      return dataSet.string(key);
+      const text = dataSet.string(key);
+      if (typeof text === 'undefined') return { desc: 'undefined' };
+      if (!text.length) return { desc: 'empty string' };
+      return { text };
+    }
   }
 }
 
@@ -155,25 +161,25 @@ function parsedElementsToString(
   elements: ParsedElement[],
   depth: number = 0
 ): string {
-  return elements
-    .map(e => {
-      const indent = '  '.repeat(depth);
-      const main = `${indent}${e.tag} ${e.vr} ${e.name} = ${e.text}`;
-      if (e.sequenceItems) {
-        return (
-          main +
-          '\n' +
-          e.sequenceItems.map((sub, index) => {
-            return (
-              `${indent}  #${index}\n` + parsedElementsToString(sub, depth + 1)
-            );
-          })
-        );
-      } else {
-        return main;
-      }
-    })
-    .join('\n');
+  const lines = elements.map(e => {
+    const indent = '  '.repeat(depth);
+    const print = e.desc ? `<${e.desc}>` : e.text;
+    const main = `${indent}${e.tag} ${e.vr} ${e.name} = ${print}`;
+    if (e.sequenceItems) {
+      return (
+        main +
+        '\n' +
+        e.sequenceItems.map((sub, index) => {
+          return (
+            `${indent}  #${index}\n` + parsedElementsToString(sub, depth + 1)
+          );
+        })
+      );
+    } else {
+      return main;
+    }
+  });
+  return lines.join('\n');
 }
 
 /**
@@ -236,7 +242,9 @@ export default class DicomContentProvider
 
     // Prepares a character encoding converter based on Specific Character Set.
     const specificCharacterSet = rootDataSet.string('x00080005');
-    let encConverter = await this._prepareEncConverter(specificCharacterSet);
+    const encConverter = specificCharacterSet
+      ? await this._prepareEncConverter(specificCharacterSet)
+      : (b: Buffer) => b.toString('latin1');
 
     const readDataSet = (dataSet: parser.DataSet) => {
       const entries: ParsedElement[] = [];
@@ -257,24 +265,18 @@ export default class DicomContentProvider
           element.vr ||
           (tagInfo ? tagInfo.vr : '??');
 
-        const rawText: string | undefined = elementToText(
+        const textOrDesc = elementToText(
           dataSet,
           key,
           vr,
           rootDataSet,
           encConverter
         );
-        const text =
-          typeof rawText === 'string'
-            ? rawText.length
-              ? rawText
-              : '<empty string>'
-            : '<undefined>';
         entries.push({
           tag: formatTag(element.tag),
           name: tagInfo ? tagInfo.name : '?',
           vr,
-          text,
+          ...textOrDesc,
           sequenceItems: Array.isArray(element.items)
             ? element.items.map(item => readDataSet(item.dataSet))
             : undefined
