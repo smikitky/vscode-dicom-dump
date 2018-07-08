@@ -48,7 +48,7 @@ Use the context menu on a DICOM file and select "DICOM: Dump DICOM tags".
 
 **The "Dump DICOM tags" context menu doesn't show up!**: Your DICOM file must have the extension `*.dcm` or `*.dicom`. Please let me know if you know other famous file naming conventions. Currently, VS Code cannot determine the type of a _binary_ file based on its contents.
 
-**Patient/institution names are garbled!**: Currently the character encoding support is limited and buggy, and it's partically due to the fact that DICOM uses rare character encodings not supported by iconv-lite. Also note that some DICOM software stores multibyte strings with a totally wrong encoding (e.g., Japanse SJIS). I'd rather not support all types of malformed files, but reasonable suggestions and PRs are welcome.
+**Patient/institution names are garbled!**: Currently the character encoding support is limited and buggy, and it's partially due to the fact that DICOM uses rare character encodings not supported by iconv-lite. Also note that some DICOM software stores multibyte strings with a totally wrong encoding (e.g., Japanse SJIS). I'd rather not support all types of malformed files, but reasonable suggestions and PRs are welcome.
 
 ## Known Issues / Limitations
 
