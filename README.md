@@ -12,9 +12,9 @@ Use the context menu on the DICOM file and select "DICOM: Dump DICOM tags".
 
 ## Features
 
-- Dumps all DICOM tags in human-readable format (except binaries).
+- Dumps all DICOM tags in human-readable format (except binary data).
 - Understands value representation (VRs) of most standard DICOM tags.
-- Supports character encoding conversion for some encodings.
+- Basic support for character encodings.
 - 100% JavaScript. Does not require any external binary dependencies like DCMTK.
 
 ## Configuration
@@ -48,7 +48,7 @@ Use the context menu on the DICOM file and select "DICOM: Dump DICOM tags".
 
 **The "Dump DICOM tags" context menu doesn't show up!**: Your DICOM file must have the extension `*.dcm` or `*.dicom`. Please let me know if you know other famous file naming conventions. Currently, VS Code cannot properly guess the type of a binary file based on its contents.
 
-**Patient/Institution Name is garbled!**: For now, this extension recognizes very few character encodings, simply because I don't know which are actually used and worth supporting. I made the [relevant code](./src/encConverter.ts) as simple as possible, so feel free to submit an issue or a PR.
+**Patient/Institution Name is garbled!**:
 
 ## Known Issues / Limitations
 
@@ -56,7 +56,8 @@ Use the context menu on the DICOM file and select "DICOM: Dump DICOM tags".
 
 - Does not work with remote workspaces mounted with `FileSystemProvider` (blocked by: microsoft/vscode#48034).
 - It's not possible to modify DICOM files.
-- Character encoding support is poor. PRs are welcome.
+- Character encoding support is limited, and it lacks Korean character support.
+  PRs are welcome.
 
 ## Bugs / PRs
 
