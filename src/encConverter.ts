@@ -28,11 +28,13 @@ const iconvLite: (encoding: string) => (() => Promise<Decoder>) = encoding => {
 
 const encMap: { [key: string]: () => Promise<Decoder> } = {
   'IR 6': async () => b => b.toString('utf8'), // ASCII (but utf8 is compatible)
-  'IR 13': iconvLite('sjis'), // Japanese half-width katakana (sjis is compatible)
+  'IR 13': iconvLite('sjis'), // Japanese half-width kana (sjis is compatible)
   'IR 87': async () => {
     // Japanese JIS kanji
     const jconv = await import('jconv');
     return b => jconv.decode(b, 'iso-2022-jp');
+    // TODO: Many DICOM files in Japan actually stores kanji in 'SJIS'
+    // rather than JIS. We might do some guessing here.
   },
   // Korean: Proper support needs pure-JS ISO-2022-KR implementation
   // 'IR 149': async () => {}
@@ -81,21 +83,22 @@ export async function createEncConverter(
   return (buffer: Buffer, vr: string) => {
     if (vr !== 'PN') {
       return decoders[0](buffer, vr);
-    } else {
-      // If VR is 'PN', we need to separately decode each
-      // component delimited by '='.
-      const components = buffer
-        .toString('binary')
-        .split('=')
-        .map(s => Buffer.from(s, 'binary'));
-      const decodedComponents = components.map((component, index) => {
-        const decoder =
-          index < decoders.length
-            ? decoders[index]
-            : decoders[charSets.length - 1];
-        return decoder(component, vr);
-      });
-      return decodedComponents.join('=');
     }
+    // If VR is 'PN', we need to separately decode each
+    // component delimited by '='.
+    // TODO: This may be broken since multi-byte characters
+    // may contain '=' (0x3D) in the trailing byte(s)
+    const components = buffer
+      .toString('binary')
+      .split('=')
+      .map(s => Buffer.from(s, 'binary'));
+    const decodedComponents = components.map((component, index) => {
+      const decoder =
+        index < decoders.length
+          ? decoders[index]
+          : decoders[charSets.length - 1];
+      return decoder(component, vr);
+    });
+    return decodedComponents.join('=');
   };
 }
