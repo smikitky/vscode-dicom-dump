@@ -34,13 +34,8 @@ const encMap: { [key: string]: () => Promise<Decoder> } = {
     const jconv = await import('jconv');
     return b => jconv.decode(b, 'iso-2022-jp');
   },
-  'IR 149': async () => {
-    // Korean
-    const iconv = await import('iconv-lite');
-    // HACK!: FIXME!: We should use a pure-JS ISO-2022-KR implementation,
-    // but here we just ignore the escape sequence.
-    return b => iconv.decode(b, 'euc-kr').replace(/\x1b\x24\x29\x43/g, '');
-  },
+  // Korean: Proper support needs pure-JS ISO-2022-KR implementation
+  // 'IR 149': async () => {}
   'IR 100': iconvLite('iso-8859-1'), // Latin-1
   'IR 101': iconvLite('iso-8859-2'), // Latin-2
   'IR 109': iconvLite('iso-8859-3'), // Latin-3
