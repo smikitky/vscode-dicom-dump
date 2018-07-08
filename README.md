@@ -1,8 +1,9 @@
 # DICOM Dump for Visual Studio Code
 
-A [Visual Studio Code][vsc] (vscode) extension that dumps DICOM tag contents.
+A [Visual Studio Code][vsc] (vscode) extension that dumps [DICOM][dicom] tag contents.
 
 [vsc]: https://code.visualstudio.com/
+[dicom]: https://www.dicomstandard.org/
 
 ## Usage
 
