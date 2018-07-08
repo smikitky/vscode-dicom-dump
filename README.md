@@ -6,9 +6,9 @@ A [Visual Studio Code][vsc] (vscode) extension that dumps DICOM tag contents.
 
 ## Usage
 
-![Screenshot](./doc/screenshot.png)
+![Screenshot](https://raw.githubusercontent.com/smikitky/vscode-dicom-dump/master/doc/screenshot.png)
 
-Use the context menu on the DICOM file and select "DICOM: Dump DICOM tags".
+Use the context menu on a DICOM file and select "DICOM: Dump DICOM tags".
 
 ## Features
 
