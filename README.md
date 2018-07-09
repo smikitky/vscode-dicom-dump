@@ -1,6 +1,6 @@
 # DICOM Dump for Visual Studio Code
 
-A [Visual Studio Code][vsc] (vscode) extension that dumps [DICOM][dicom] tag contents.
+A [Visual Studio Code][vsc] (vscode) extension that dumps [DICOM][dicom] tag contents. DICOM is the standard file format for medical images.
 
 [vsc]: https://code.visualstudio.com/
 [dicom]: https://www.dicomstandard.org/
@@ -25,7 +25,7 @@ Use the context menu on a DICOM file and select "DICOM: Dump DICOM tags".
   Note that many private tags have 'UN' (unknown) VR type, which means
   this extension does not know how to stringify them.
 
-- `dicom.dictionary` modifies or adds entries to
+- `dicom.dictionary` (default = `{}`) modifies or adds entries to
   the standard DICOM dictionary. Example:
 
   ```json
@@ -47,22 +47,23 @@ Use the context menu on a DICOM file and select "DICOM: Dump DICOM tags".
 
 [demo]: https://github.com/cornerstonejs/dicomParser
 
-**The "Dump DICOM tags" context menu doesn't show up!**: Your DICOM file must have the extension `*.dcm` or `*.dicom`. Please let me know if you know other famous file naming conventions. Currently, VS Code cannot determine the type of a _binary_ file based on its contents.
+**The "Dump DICOM tags" context menu doesn't show up!**: Your DICOM file _must_ have the extension `*.dcm` or `*.dicom`. Please let me know if you know other well-known file naming conventions. Currently, VS Code cannot determine the type of a _binary_ file based on its contents.
 
-**Patient/institution names are garbled!**: Currently the character encoding support is limited and buggy, and it's partially due to the fact that DICOM uses rare character encodings not supported by iconv-lite. Also note that some DICOM software stores multibyte strings with a totally wrong encoding (e.g., Japanse SJIS). I'd rather not support all types of malformed files, but reasonable suggestions and PRs are welcome.
+**Patient/institution names are garbled!**: Currently the character encoding support is limited and buggy, and it's partially due to the fact that DICOM uses rare character encodings not supported by iconv-lite. Also note that some DICOM implementations store multibyte strings with a totally wrong encoding (e.g., Japanse SJIS). I'd rather not support all sorts of malformed files "in the wild", but reasonable suggestions and PRs are welcome.
 
 ## Known Issues / Limitations
 
 **USE AT YOUR OWN RISK. DO NOT USE THIS FOR CLINICAL PURPOSES.**
 
 - Does not work with remote workspaces mounted with `FileSystemProvider` (blocked by: microsoft/vscode#48034).
+- Cannot display the image (pixel/voxel data) itself.
 - It's not possible to modify DICOM files.
 - Character encoding support is limited, and it lacks Korean character support.
   PRs are welcome.
 
 ## Bugs / PRs
 
-Use GitHub's issue system.
+Plase use GitHub's issue system.
 
 ## Acknowledgement
 
