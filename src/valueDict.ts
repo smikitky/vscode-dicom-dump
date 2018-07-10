@@ -177,14 +177,33 @@ const dict: ValueDict = {
     YBR_FULL:
       'Pixel data represent a color image described by one luminance (Y) and two chrominance planes (CB and CR).',
     YBR_FULL_422:
-      'The same as YBR_FULL except that the CB and CR values are sampled horizontally at half the Y rate and as a result there are half as many CB and CR values as Y values.',
-    YBR_PARTIAL_422: '',
+      'Pixel data represent a color image described by one luminance (Y) and two chrominance planes (CB and CR).',
+    YBR_PARTIAL_422:
+      'Pixel data represent a color image described by one luminance (Y) and two chrominance planes (CB and CR).',
     YBR_PARTIAL_420:
-      'The same as YBR_PARTIAL_422 except that the CB and CR values are sampled horizontally and vertically at half the Y rate and as a result there are four times less CB and CR values than Y values, versus twice less for YBR_PARTIAL_422.',
+      'Pixel data represent a color image described by one luminance (Y) and two chrominance planes (CB and CR).',
     YBR_ICT:
       'Irreversible Color Transformation: Pixel data represent a color image described by one luminance (Y) and two chrominance planes (CB and CR).',
     YBR_RCT:
       'Reversible Color Transformation: Pixel data represent a color image described by one luminance (Y) and two chrominance planes (CB and CR).'
+  },
+  '0028,0006': {
+    // Planar Configuration
+    '0':
+      'The sample values for the first pixel are followed by the sample values for the second pixel, etc. For RGB images, this means the order of the pixel values sent shall be R1, G1, B1, R2, G2, B2, …, etc.',
+    '1':
+      'Each color plane shall be sent contiguously. For RGB images, this means the order of the pixel values sent is R1, R2, R3, …, G1, G2, G3, …, B1, B2, B3, etc.'
+  },
+  '0028,0103': {
+    // Pixel Representation
+    '0': '0: Pixel samples are represented in unsigned integer.',
+    '1': "1: Pixel samples are represnted in 2's complement (signed integer)."
+  },
+  '0028,1040': {
+    // Pixel Intensity Relationship
+    LIN: 'Pixel samples are linearly proportional to X-Ray beam intensity.',
+    LOG:
+      'Pixel samples are logarithmically proportional to X-Ray beam intensity.'
   }
 };
 
