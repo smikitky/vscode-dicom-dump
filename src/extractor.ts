@@ -151,7 +151,13 @@ function findTagInfo(
   tag: string
 ): (TagInfo & { forceVr?: string }) | undefined {
   const key = tag.substring(1, 9).toUpperCase();
-  return dictionary[key];
+  if (key in dictionary) return dictionary[key];
+  if (/0000$/.test(key)) {
+    // (gggg,0000) is a _retired_ Group Length tag
+    // http://dicom.nema.org/dicom/2013/output/chtml/part05/sect_7.2.html
+    return { name: 'GroupLength', vr: 'UL' };
+  }
+  return undefined;
 }
 
 /**
