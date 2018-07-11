@@ -1,6 +1,6 @@
 # Change Log
 
-## Next
+## 1.1.0 (2018-07-11)
 
 - Provides a hover for some DICOM keywords and reserved UIDs
   that are hard to remember, such as Transfer Syntax UID.
