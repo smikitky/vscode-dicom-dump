@@ -15,6 +15,8 @@ Use the context menu on a DICOM file and select "DICOM: Dump DICOM tags".
 
 - Dumps all DICOM tags in human-readable format (except binary data).
 - Understands value representation (VRs) of most standard DICOM tags.
+- Provides a hover for some hard-to-remember DICOM keywords and UIDs.<br>
+  ![Screenshot](https://raw.githubusercontent.com/smikitky/vscode-dicom-dump/master/doc/screenshot-values.png)
 - Basic support for character encodings.
 - 100% JavaScript. Does not require any external binary dependencies like DCMTK.
 
