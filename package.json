@@ -29,6 +29,27 @@
       {
         "type": "object",
         "properties": {
+          "dicom.searches": {
+            "description": "Provides a link to your favorite DICOM search engine with the tag name.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "description": "Link text. Keywords {GGGG}, {gggg}, {EEEE}, {eeee} will be replaced."
+                },
+                "url": {
+                  "type": "string",
+                  "description": "Link URL. Keywords {GGGG}, {gggg}, {EEEE}, {eeee} will be replaced."
+                }
+              },
+              "required": [
+                "title",
+                "url"
+              ]
+            }
+          },
           "dicom.showPrivateTags": {
             "description": "Controls the visibility of DICOM private tags. Private tags without specific value representation may not render properly.",
             "type": "boolean"

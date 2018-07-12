@@ -43,6 +43,22 @@ Use the context menu on a DICOM file and select "DICOM: Dump DICOM tags".
   another type is explicitly specified in the DICOM file.
   This may allow you to sniff the contents of some private tags.
 
+- `dicom.searches` (default = `[]`) provides a quick link to your favorite
+  DICOM search engine when the mouse hovers on a tag string. Example:
+
+  ```json
+  {
+    "dicom.searches": [
+      {
+        "title": "Search {EEEE},{GGGG} on Google",
+        "url": "https://www.google.com/search?q=DICOM%20{EEEE},{GGGG}"
+      }
+    ]
+  }
+  ```
+
+  Four keywords (`{EEEE}`, `{eeee}`, `{GGGG}` and `{gggg}`) will be replaced.
+
 ## Troubleshooting
 
 **My DICOM file does not load at all!**: Can you open that file with [dicom-parser's online demo][demo]? If not, probably your DICOM file is not standard-compliant, and there is little I can do. Some DICOM implementations are tolerant enough to open mildly broken files. Just because you can view your file with &lt;insert your favorite viewer here&gt; does not mean the file is not corrupted. If you could open the file with the demo above and are still getting an error from this extension, feel free to report as a bug.
