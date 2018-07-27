@@ -1,6 +1,6 @@
 # DICOM Dump for Visual Studio Code
 
-A [Visual Studio Code][vsc] (vscode) extension that dumps [DICOM][dicom] tag contents. DICOM is the standard file format for medical images.
+A [Visual Studio Code][vsc] (vscode) extension that dumps [DICOM][dicom] tag contents. DICOM is a standard file format for medical images.
 
 [vsc]: https://code.visualstudio.com/
 [dicom]: https://www.dicomstandard.org/
@@ -9,7 +9,7 @@ A [Visual Studio Code][vsc] (vscode) extension that dumps [DICOM][dicom] tag con
 
 ![Screenshot](https://raw.githubusercontent.com/smikitky/vscode-dicom-dump/master/doc/screenshot.png)
 
-Use the context menu on a DICOM file and select "DICOM: Dump DICOM tags".
+Open a context menu on a DICOM file and select "DICOM: Dump DICOM tags".
 
 ## Features
 

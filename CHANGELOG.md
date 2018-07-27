@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.2.0
+
+- Added new configuration `dicom.searches`.
+- Fixed bugs regarding ISO-2022-JP encoding (Japanese).
+
 ## 1.1.0 (2018-07-11)
 
 - Provides a hover for some DICOM keywords and reserved UIDs
