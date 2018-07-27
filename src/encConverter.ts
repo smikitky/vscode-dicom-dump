@@ -32,7 +32,16 @@ const encMap: { [key: string]: () => Promise<Decoder> } = {
   'IR 87': async () => {
     // Japanese JIS kanji
     const jconv = await import('jconv');
-    return b => jconv.decode(b, 'iso-2022-jp');
+    return b => {
+      // HACK: Replace the escape sequence 'ESC ( J' to 'ESC ( B'.
+      // Both roughly mean "switch to ASCII",
+      // but jconv currently does not support the former.
+      const buf = Buffer.from(
+        b.toString('binary').replace(/\x1b\x28\x4a/g, '\x1b\x28\x42'),
+        'binary'
+      );
+      return jconv.decode(buf, 'iso-2022-jp');
+    };
     // TODO: Many DICOM files in Japan actually stores kanji in 'SJIS'
     // rather than JIS. We might do some guessing here.
   },
@@ -86,12 +95,9 @@ export async function createEncConverter(
     }
     // If VR is 'PN', we need to separately decode each
     // component delimited by '='.
-    // TODO: This may be broken since multi-byte characters
-    // may contain '=' (0x3D) in the trailing byte(s)
-    const components = buffer
-      .toString('binary')
-      .split('=')
-      .map(s => Buffer.from(s, 'binary'));
+    const components = splitPnComponents(buffer.toString('binary')).map(s =>
+      Buffer.from(s, 'binary')
+    );
     const decodedComponents = components.map((component, index) => {
       const decoder =
         index < decoders.length
@@ -101,4 +107,39 @@ export async function createEncConverter(
     });
     return decodedComponents.join('=');
   };
+}
+
+/**
+ * Splits a string using the delimiter '=',
+ * taking escape sequence into consideration.
+ * https://en.wikipedia.org/wiki/ISO/IEC_2022
+ */
+export function splitPnComponents(input: string): string[] {
+  const len = input.length;
+  const results: string[] = [];
+  let escaped: boolean = false;
+  let i = 0;
+  let start = 0;
+  while (i < len) {
+    if (!escaped && input[i] === '=') {
+      results.push(input.substring(start, i));
+      start = i + 1;
+      i++;
+      continue;
+    }
+    const substr = input.substr(i, 3);
+    if (substr.match(/^\x1b\$(@|B|\(D)/)) {
+      // Switch to kanji
+      escaped = true;
+      i += 3;
+    } else if (substr.match(/^\x1b\([BJ]/)) {
+      // Switch to ASCII / JIS X 0201
+      escaped = false;
+      i += 3;
+    } else {
+      i++;
+    }
+  }
+  results.push(input.substr(start));
+  return results;
 }

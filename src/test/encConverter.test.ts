@@ -3,8 +3,7 @@ import { createEncConverter } from '../encConverter';
 
 // Performs encoding checks using DICOM spec sppendix H to K
 // http://dicom.nema.org/dicom/2013/output/chtml/part05/PS3.5.html
-
-suite('createEndConverter', function() {
+suite('createEncConverter', function() {
   const encodeToBuffer = (str: string) => {
     const replaced = str
       .replace(/\#.*$/gm, '')
@@ -45,8 +44,7 @@ suite('createEndConverter', function() {
     assert.equal(result, 'Yamada^Tarou=山田^太郎=やまだ^たろう');
   });
 
-  // Failing
-  test.skip('H: Japanese example 2', async function() {
+  test('H: Japanese example 2', async function() {
     const ec = await createEncConverter('ISO 2022 IR 13\\ISO 2022 IR 87');
     const buf = encodeToBuffer(`
       13/04 12/15 12/00 13/14              # ﾔﾏﾀﾞ
@@ -71,6 +69,37 @@ suite('createEndConverter', function() {
     `);
     const result = ec!(buf, 'PN');
     assert.equal(result, 'ﾔﾏﾀﾞ^ﾀﾛｳ=山田^太郎=やまだ^たろう');
+  });
+
+  test('Japanese, 0x3d in leading byte', async function() {
+    // This is tricky because the kanji 秋 contains 0x3d as the leading byte.
+    // Taken from JIRA's DICOM test suite
+    // http://www.jira-net.or.jp/dicom/dicom_data_01_02.html
+    // File: CR_JPG_IR87a.dcm
+    const ec = await createEncConverter('\\ISO 2022 IR 87');
+    const buf = encodeToBuffer(`
+      0x41 0x4b 0x49 0x48 0x41 0x42 0x41 0x52 0x41       # AKIHABARA
+      0x5e                                               # ^
+      0x54 0x41 0x52 0x4f                                # TARO
+      0x3d                                               # =
+      0x1b 0x24 0x42                                     # ESC $ B
+      0x3d 0x29 0x4d 0x55 0x38 0x36                      # 秋葉原
+      0x1b 0x28 0x42                                     # ESC ( B
+      0x5e                                               # ^
+      0x1b 0x24 0x42                                     # ESC $ B
+      0x42 0x40 0x4f 0x3a                                # 太郎
+      0x1b 0x28 0x42                                     # ESC ( B
+      0x3d                                               # =
+      0x1b 0x24 0x42                                     # ESC $ B
+      0x24 0x22 0x24 0x2d 0x24 0x4f 0x24 0x50 0x24 0x69  # あきはばら
+      0x1b 0x28 0x42                                     # ESC ( B
+      0x5e                                               # ^
+      0x1b 0x24 0x42                                     # ESC $ B
+      0x24 0x3f 0x24 0x6d 0x24 0x26                      # たろう
+      0x1b 0x28 0x42                                     # ESC ( B
+    `);
+    const result = ec!(buf, 'PN');
+    assert.equal(result, 'AKIHABARA^TARO=秋葉原^太郎=あきはばら^たろう');
   });
 
   // Failing
