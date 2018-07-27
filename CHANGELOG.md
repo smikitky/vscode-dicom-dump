@@ -4,6 +4,7 @@
 
 - Added new configuration `dicom.searches`.
 - Fixed bugs regarding ISO-2022-JP encoding (Japanese).
+- Added support for ISO-2022-KR encoding (Korean).
 
 ## 1.1.0 (2018-07-11)
 

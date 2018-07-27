@@ -45,8 +45,19 @@ const encMap: { [key: string]: () => Promise<Decoder> } = {
     // TODO: Many DICOM files in Japan actually stores kanji in 'SJIS'
     // rather than JIS. We might do some guessing here.
   },
-  // Korean: Proper support needs pure-JS ISO-2022-KR implementation
-  // 'IR 149': async () => {}
+  'IR 149': async () => {
+    // EUC-KR is basically the same as ISO-2022-KR
+    // except that KS X 1001 is implicitly invoked to G1 without
+    // the escape sequence 'ESC $ ) C'. So we can simply remove this sequence.
+    const iconv = await iconvLite('euc-kr')();
+    return buffer => {
+      const replaced = Buffer.from(
+        buffer.toString('binary').replace(/\x1b\x24\x29\x43/g, ''),
+        'binary'
+      );
+      return iconv(replaced);
+    };
+  },
   'IR 100': iconvLite('iso-8859-1'), // Latin-1
   'IR 101': iconvLite('iso-8859-2'), // Latin-2
   'IR 109': iconvLite('iso-8859-3'), // Latin-3
@@ -115,6 +126,8 @@ export async function createEncConverter(
  * https://en.wikipedia.org/wiki/ISO/IEC_2022
  */
 export function splitPnComponents(input: string): string[] {
+  // Note: this is only necessary for Japanese ISO-2022-JP,
+  // where kanji characters are invoked to the G0 area.
   const len = input.length;
   const results: string[] = [];
   let escaped: boolean = false;

@@ -102,8 +102,7 @@ suite('createEncConverter', function() {
     assert.equal(result, 'AKIHABARA^TARO=秋葉原^太郎=あきはばら^たろう');
   });
 
-  // Failing
-  test.skip('I: Korean', async function() {
+  test('I: Korean', async function() {
     const ec = await createEncConverter('\\ISO 2022 IR 149');
     const buf = encodeToBuffer(`
       04/08 06/15 06/14 06/07                    # Hong

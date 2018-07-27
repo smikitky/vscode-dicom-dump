@@ -76,8 +76,6 @@ Open a context menu on a DICOM file and select "DICOM: Dump DICOM tags".
 - Does not work with remote workspaces mounted with `FileSystemProvider` (blocked by: microsoft/vscode#48034).
 - Cannot display the image (pixel/voxel data) itself.
 - It's not possible to modify DICOM files.
-- Character encoding support is limited, and it lacks Korean character support.
-  PRs are welcome.
 
 ## Bugs / PRs
 
