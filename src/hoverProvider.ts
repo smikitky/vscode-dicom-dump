@@ -67,12 +67,12 @@ export default class DicomHoverProvider implements vscode.HoverProvider {
         .getConfiguration('dicom')
         .get<SearchConfig[]>('searches');
       if (!Array.isArray(searches) || !searches.length) return;
-      const [EEEE, GGGG] = tag.split(',');
+      const [GGGG, EEEE] = tag.split(',');
       const keywords = {
-        EEEE,
         GGGG,
-        eeee: EEEE.toLowerCase(),
-        gggg: GGGG.toLowerCase()
+        EEEE,
+        gggg: GGGG.toLowerCase(),
+        eeee: EEEE.toLowerCase()
       };
 
       const links = searches.map(search => ({

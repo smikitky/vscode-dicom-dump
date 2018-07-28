@@ -50,14 +50,14 @@ Open a context menu on a DICOM file and select "DICOM: Dump DICOM tags".
   {
     "dicom.searches": [
       {
-        "title": "Search {EEEE},{GGGG} on Google",
-        "url": "https://www.google.com/search?q=DICOM%20{EEEE},{GGGG}"
+        "title": "Search {GGGG},{EEEE} on Google",
+        "url": "https://www.google.com/search?q=DICOM%20{GGGG},{EEEE}"
       }
     ]
   }
   ```
 
-  Four keywords (`{EEEE}`, `{eeee}`, `{GGGG}` and `{gggg}`) will be replaced.
+  Four keywords (`{GGGG}`, `{gggg}`, `{EEEE}` and `{eeee}`) will be replaced.
 
 ## Troubleshooting
 

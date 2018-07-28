@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.2.1 (2018-07-28)
+
+- Fixed: wrong keyword replacement on search
+
 ## 1.2.0 (2018-07-28)
 
 - Added new configuration `dicom.searches`.
