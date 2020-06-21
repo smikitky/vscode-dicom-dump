@@ -1,6 +1,7 @@
 'use strict';
 import * as vscode from 'vscode';
 import DicomHoverProvider from './hoverProvider';
+import * as qs from 'qs';
 
 const scheme = 'dicom-dump';
 
@@ -10,10 +11,14 @@ export function activate(context: vscode.ExtensionContext): void {
     new ContentProviderWrapper()
   );
 
-  const open = (ext: string) => {
+  const open = (mode: string) => {
     return async (uri: vscode.Uri) => {
       if (!(uri instanceof vscode.Uri)) return;
-      const newUri = uri.with({ scheme, path: uri.path + '.' + ext });
+      const newUri = uri.with({
+        query: qs.stringify({ scheme: uri.scheme, mode }),
+        scheme,
+        path: uri.path + '.' + mode
+      });
       const doc = await vscode.workspace.openTextDocument(newUri);
       return vscode.window.showTextDocument(doc);
     };

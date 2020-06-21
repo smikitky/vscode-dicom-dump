@@ -1,12 +1,9 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs';
-import * as pify from 'pify'; // Promisify
+import * as qs from 'qs';
 import * as parser from 'dicom-parser';
 import { standardDataElements, DicomDataElements } from 'dicom-data-dictionary';
 import { EncConverter, createEncConverter } from './encConverter';
 import { buildTreeFromDataSet, ParsedElement } from './extractor';
-
-const readFile = pify(fs.readFile);
 
 /**
  * Transforms the parsed elements into indented text.
@@ -68,14 +65,18 @@ export default class DicomContentProvider
     const showPrivateTags = !!config.get('showPrivateTags');
 
     if (!(uri instanceof vscode.Uri)) return '';
-    const dumpMode = /\.dcmdump$/.test(uri.fsPath) ? 'dcmdump' : 'json';
+    const query = qs.parse(uri.query);
+    const scheme = query.scheme as string;
+    const dumpMode = query.mode as string;
 
-    const path = uri.fsPath.replace(/\.(dcmdump|json)$/, '');
     let rootDataSet: parser.DataSet;
+    const path = uri.fsPath.replace(/\.(dcmdump|json)$/, '');
+    const fileUri = uri.with({ scheme, path });
     try {
-      const fileContent = await readFile(path);
-      const byteArray = new Uint8Array(fileContent.buffer);
-      rootDataSet = parser.parseDicom(byteArray);
+      const fileContent = await vscode.workspace.fs.readFile(fileUri);
+      // Clone as a 'pure' Uint8Array to avoid encoding issues
+      const arr = new Uint8Array(fileContent);
+      rootDataSet = parser.parseDicom(arr);
     } catch (e) {
       vscode.window.showErrorMessage(
         'Error opening DICOM file. ' + (typeof e === 'string' ? e : e.message)
