@@ -13,10 +13,7 @@ const readFile = pify(fs.readFile);
  * @param elements
  * @param depth
  */
-function parsedElementsToString(
-  elements: ParsedElement[],
-  depth: number = 0
-): string {
+function parsedElementsToString(elements: ParsedElement[], depth = 0): string {
   const lines = elements.map(e => {
     const indent = '  '.repeat(depth);
     const print = e.desc ? `<${e.desc}>` : e.text;

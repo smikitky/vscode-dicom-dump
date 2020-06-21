@@ -1,0 +1,15 @@
+extends:
+  - eslint:recommended
+  - plugin:@typescript-eslint/recommended
+parserOptions:
+  sourceType: module
+env:
+  es6: true
+  node: true
+  mocha: true
+parser: '@typescript-eslint/parser'
+plugins: ['@typescript-eslint']
+rules:
+  no-control-regex: off
+  '@typescript-eslint/no-non-null-assertion': off
+  '@typescript-eslint/no-explicit-any': off

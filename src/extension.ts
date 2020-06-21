@@ -4,7 +4,7 @@ import DicomHoverProvider from './hoverProvider';
 
 const scheme = 'dicom-dump';
 
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext): void {
   const r1 = vscode.workspace.registerTextDocumentContentProvider(
     scheme,
     new ContentProviderWrapper()

@@ -91,7 +91,7 @@ export async function createEncConverter(
 
   // Now asynchronously create decoders that corresponds to each value.
   // External modules required for conversion will be lazily-loaded here.
-  for (let cs of charSets) {
+  for (const cs of charSets) {
     const enc = Object.keys(encMap).find(k => cs.endsWith(k));
     if (!enc) return undefined;
     const decoder = createdDecoders.get(enc) || (await encMap[enc]());
@@ -130,7 +130,7 @@ export function splitPnComponents(input: string): string[] {
   // where kanji characters are invoked to the G0 area.
   const len = input.length;
   const results: string[] = [];
-  let escaped: boolean = false;
+  let escaped = false;
   let i = 0;
   let start = 0;
   while (i < len) {

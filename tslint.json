@@ -1,9 +1,0 @@
-{
-  "rules": {
-    "no-string-throw": true,
-    "no-duplicate-variable": true,
-    "class-name": true,
-    "triple-equals": true
-  },
-  "defaultSeverity": "warning"
-}

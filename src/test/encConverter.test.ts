@@ -6,7 +6,7 @@ import { createEncConverter } from '../encConverter';
 suite('createEncConverter', function () {
   const encodeToBuffer = (str: string) => {
     const replaced = str
-      .replace(/\#.*$/gm, '')
+      .replace(/#.*$/gm, '')
       .replace(/(\d\d)\/(\d\d)/g, (m, p1, p2) =>
         String.fromCharCode((parseInt(p1) << 4) + parseInt(p2))
       )

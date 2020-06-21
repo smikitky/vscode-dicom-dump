@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 function extractKeyword(
   str: string,
   position: number,
-  separator: string = '\\'
+  separator = '\\'
 ): { str: string; start: number } {
   const after = str.indexOf(separator, position);
   const before = str.lastIndexOf(separator, position);
@@ -34,7 +34,7 @@ export default class DicomHoverProvider implements vscode.HoverProvider {
     document: vscode.TextDocument,
     position: vscode.Position,
     token: vscode.CancellationToken
-  ) {
+  ): Promise<vscode.Hover | undefined> {
     const makeHover = (pos: number, length: number, content: string) =>
       new vscode.Hover(
         content,
@@ -52,7 +52,7 @@ export default class DicomHoverProvider implements vscode.HoverProvider {
     // we need to reanalyze the line.
     const line = document.lineAt(position.line).text;
     const match = line.match(
-      /(\s*)(\([0-9A-F]{4}\,[0-9A-F]{4}\)) ([A-Z]{2}(\|[A-Z])*)/
+      /(\s*)(\([0-9A-F]{4},[0-9A-F]{4}\)) ([A-Z]{2}(\|[A-Z])*)/
     );
     if (!match) return;
     const tag = match[2].replace(/\(|\)/g, '');

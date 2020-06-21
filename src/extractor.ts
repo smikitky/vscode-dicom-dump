@@ -178,7 +178,7 @@ export function buildTreeFromDataSet(
   const { rootDataSet, showPrivateTags, dictionary, encConverter } = deps;
   const entries: ParsedElement[] = [];
   const keys = Object.keys(dataSet.elements).sort();
-  for (let key of keys) {
+  for (const key of keys) {
     const element = dataSet.elements[key];
 
     // A tag is private if the group number is odd
