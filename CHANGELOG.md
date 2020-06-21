@@ -2,6 +2,7 @@
 
 ## 1.3.0
 
+- Implemented inline decorations.
 - Added `alwaysShowMenu` option.
 - Added support for FileSystemProvider. You can now load DICOM files via [SSH FS](https://marketplace.visualstudio.com/items?itemName=Kelvin.vscode-sshfs), for example.
 

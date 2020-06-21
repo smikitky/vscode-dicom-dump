@@ -1,6 +1,7 @@
 'use strict';
 import * as vscode from 'vscode';
 import DicomHoverProvider from './hoverProvider';
+import decorate from './decorate';
 import * as qs from 'qs';
 
 const scheme = 'dicom-dump';
@@ -33,7 +34,20 @@ export function activate(context: vscode.ExtensionContext): void {
     new DicomHoverProvider()
   );
 
-  context.subscriptions.push(r1, r2, r3, r4);
+  // Decoration in text editor
+  let activeEditor = vscode.window.activeTextEditor;
+  const decorateActiveEditor = () => {
+    if (activeEditor && activeEditor.document.languageId === 'dicom-dump')
+      decorate(activeEditor);
+  };
+  decorateActiveEditor();
+  const r5 = vscode.window.onDidChangeActiveTextEditor(editor => {
+    activeEditor = editor;
+    decorateActiveEditor();
+  });
+
+  // Dispose
+  context.subscriptions.push(r1, r2, r3, r4, r5);
 }
 
 // export function deactivate() {}
