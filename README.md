@@ -22,6 +22,11 @@ Open a context menu on a DICOM file and select "DICOM: Dump DICOM tags".
 
 ## Configuration
 
+- `dicom.alwaysShowMenu` (default = `false`) controls the visibility of the
+  dump menus. When set to true, the menus will show up regardless of the
+  file extension. When set to false, the menus will show up when the
+  extension of the file is `*.dcm` or `*.dicom`.
+
 - `dicom.showPrivateTags` (default = `false`) controls the
   visibility of DICOM private tags. Set this to `true` to dump everything.
   Note that many private tags have 'UN' (unknown) VR type, which means
@@ -65,7 +70,7 @@ Open a context menu on a DICOM file and select "DICOM: Dump DICOM tags".
 
 [demo]: https://github.com/cornerstonejs/dicomParser
 
-**The "Dump DICOM tags" context menu doesn't show up!**: Your DICOM file _must_ have the extension `*.dcm` or `*.dicom`. Please let me know if you know other well-known file naming conventions. Currently, VS Code cannot determine the type of a _binary_ file based on its contents.
+**The "Dump DICOM tags" context menu doesn't show up!**: By default, the menus will be displayed only when the file extension is `*.dcm` or `*.dicom`. Please check the `dicom.alwaysShowMenu` option.
 
 **Patient/institution names are garbled!**: Currently the character encoding support is limited and buggy, and it's partially due to the fact that DICOM uses rare character encodings not supported by iconv-lite. Also note that some DICOM implementations store multibyte strings with a totally wrong encoding (e.g., Japanse SJIS). I'd rather not support all sorts of malformed files "in the wild", but reasonable suggestions and PRs are welcome.
 
@@ -73,7 +78,6 @@ Open a context menu on a DICOM file and select "DICOM: Dump DICOM tags".
 
 **USE AT YOUR OWN RISK. DO NOT USE THIS FOR CLINICAL PURPOSES.**
 
-- Does not work with remote workspaces mounted with `FileSystemProvider` (blocked by: microsoft/vscode#48034).
 - Cannot display the image (pixel/voxel data) itself.
 - It's not possible to modify DICOM files.
 

@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.3.0
+
+- Added `alwaysShowMenu` option.
+- Added support for FileSystemProvider. You can now load DICOM files via [SSH FS](https://marketplace.visualstudio.com/items?itemName=Kelvin.vscode-sshfs), for example.
+
 ## 1.2.1 (2018-07-28)
 
 - Fixed: wrong keyword replacement on search
