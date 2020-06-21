@@ -145,7 +145,7 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "tsc -p ./",
     "compile": "tsc -p ./",
     "lint": "eslint \"src/**/*.ts\"",
     "watch": "tsc -watch -p ./",

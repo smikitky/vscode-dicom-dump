@@ -1,6 +1,6 @@
 # Change Log
 
-## 1.3.0
+## 1.3.0 (2020-06-22)
 
 - Implemented inline decorations.
 - Added `alwaysShowMenu` option.
