@@ -38,7 +38,7 @@ const dict: ValueDict = {
     '1.2.840.10008.1.2.4.65': 'JPEG Lossless, Nonhierarchical (Process 28)',
     '1.2.840.10008.1.2.4.66': 'JPEG Lossless, Nonhierarchical (Process 29)',
     '1.2.840.10008.1.2.4.70':
-      'JPEG Lossless, Nonhierarchical, First- Order Prediction',
+      'JPEG Lossless, Nonhierarchical, First-Order Prediction',
     '1.2.840.10008.1.2.4.80': 'JPEG-LS Lossless Image Compression',
     '1.2.840.10008.1.2.4.81':
       'JPEG-LS Lossy (Near- Lossless) Image Compression',
