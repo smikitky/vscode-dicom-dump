@@ -29,6 +29,10 @@
       {
         "type": "object",
         "properties": {
+          "dicom.alwaysShowMenu": {
+            "description": "When true, shows the DICOM dump menus regardless of the file extension.",
+            "type": "boolean"
+          },
           "dicom.searches": {
             "description": "Provides a link to your favorite DICOM search engine with the tag name.",
             "type": "array",
@@ -101,12 +105,12 @@
         {
           "command": "dicom.showTags",
           "group": "dicom",
-          "when": "resourceLangId == dicom"
+          "when": "resourceLangId == dicom || config.dicom.alwaysShowMenu"
         },
         {
           "command": "dicom.dumpAsJson",
           "group": "dicom",
-          "when": "resourceLangId == dicom"
+          "when": "resourceLangId == dicom || config.dicom.alwaysShowMenu"
         }
       ]
     },
