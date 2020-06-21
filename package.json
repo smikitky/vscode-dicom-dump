@@ -174,8 +174,8 @@
   },
   "dependencies": {
     "dicom-data-dictionary": "^0.3.1",
-    "dicom-parser": "^1.8.1",
-    "iconv-lite": "^0.4.23",
+    "dicom-parser": "^1.8.5",
+    "iconv-lite": "^0.6.0",
     "jconv": "^0.1.5",
     "qs": "^6.9.4"
   }
