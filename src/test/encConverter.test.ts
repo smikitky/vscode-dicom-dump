@@ -3,7 +3,7 @@ import { createEncConverter } from '../encConverter';
 
 // Performs encoding checks using DICOM spec sppendix H to K
 // http://dicom.nema.org/dicom/2013/output/chtml/part05/PS3.5.html
-suite('createEncConverter', function() {
+suite('createEncConverter', function () {
   const encodeToBuffer = (str: string) => {
     const replaced = str
       .replace(/\#.*$/gm, '')
@@ -17,7 +17,7 @@ suite('createEncConverter', function() {
     return Buffer.from(replaced, 'binary');
   };
 
-  test('H: Japanese example 1', async function() {
+  test('H: Japanese example 1', async function () {
     const ec = await createEncConverter('\\ISO 2022 IR 87');
     const buf = encodeToBuffer(`
       05/09 06/01 06/13 06/01 06/04 06/01  # Yamada
@@ -44,7 +44,7 @@ suite('createEncConverter', function() {
     assert.equal(result, 'Yamada^Tarou=山田^太郎=やまだ^たろう');
   });
 
-  test('H: Japanese example 2', async function() {
+  test('H: Japanese example 2', async function () {
     const ec = await createEncConverter('ISO 2022 IR 13\\ISO 2022 IR 87');
     const buf = encodeToBuffer(`
       13/04 12/15 12/00 13/14              # ﾔﾏﾀﾞ
@@ -71,7 +71,7 @@ suite('createEncConverter', function() {
     assert.equal(result, 'ﾔﾏﾀﾞ^ﾀﾛｳ=山田^太郎=やまだ^たろう');
   });
 
-  test('Japanese, 0x3d in leading byte', async function() {
+  test('Japanese, 0x3d in leading byte', async function () {
     // This is tricky because the kanji 秋 contains 0x3d as the leading byte.
     // Taken from JIRA's DICOM test suite
     // http://www.jira-net.or.jp/dicom/dicom_data_01_02.html
@@ -102,7 +102,7 @@ suite('createEncConverter', function() {
     assert.equal(result, 'AKIHABARA^TARO=秋葉原^太郎=あきはばら^たろう');
   });
 
-  test('I: Korean', async function() {
+  test('I: Korean', async function () {
     const ec = await createEncConverter('\\ISO 2022 IR 149');
     const buf = encodeToBuffer(`
       04/08 06/15 06/14 06/07                    # Hong
@@ -125,7 +125,7 @@ suite('createEncConverter', function() {
     assert.equal(result, 'Hong^Gildong=洪^吉洞=홍^길동');
   });
 
-  test('J: Chinese with UTF8', async function() {
+  test('J: Chinese with UTF8', async function () {
     const ec = await createEncConverter('ISO_IR 192');
     const buf = encodeToBuffer(`
       0x57 0x61 0x6e 0x67                      # Wang
@@ -141,7 +141,7 @@ suite('createEncConverter', function() {
     assert.equal(result, 'Wang^XiaoDong=王^小東=');
   });
 
-  test('J: Chinese with GB18030', async function() {
+  test('J: Chinese with GB18030', async function () {
     const ec = await createEncConverter('GB18030');
     const buf = encodeToBuffer(`
       0x57 0x61 0x6e 0x67                      # Wang

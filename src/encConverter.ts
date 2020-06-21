@@ -16,7 +16,7 @@ type Decoder = (input: Buffer) => string;
  * We use HoF because we want to load external modules as late as possible.
  * @param encoding
  */
-const iconvLite: (encoding: string) => (() => Promise<Decoder>) = encoding => {
+const iconvLite: (encoding: string) => () => Promise<Decoder> = encoding => {
   return async () => {
     const iconv = await import('iconv-lite');
     return buffer => iconv.decode(buffer, encoding);

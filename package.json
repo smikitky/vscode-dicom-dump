@@ -150,13 +150,15 @@
     "@types/node": "^7.0.43",
     "@types/pify": "^3.0.2",
     "@types/vscode": "^1.46.0",
-    "prettier": "^1.13.7",
+    "prettier": "^2.0.5",
     "tslint": "^5.8.0",
     "typescript": "^3.9.5",
     "vscode-test": "^1.4.0"
   },
   "prettier": {
-    "singleQuote": true
+    "singleQuote": true,
+    "arrowParens": "avoid",
+    "trailingComma": "none"
   },
   "dependencies": {
     "dicom-data-dictionary": "^0.3.1",
