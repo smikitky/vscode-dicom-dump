@@ -13,3 +13,7 @@ rules:
   no-control-regex: off
   '@typescript-eslint/no-non-null-assertion': off
   '@typescript-eslint/no-explicit-any': off
+overrides:
+  files: ['webpack.config.js']
+  rules:
+    '@typescript-eslint/no-var-requires': off
