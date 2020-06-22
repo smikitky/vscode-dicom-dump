@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.3.1 (2020-06-22)
+
+- Decorations are now enclosed in parentheses.
+- Introduced webpack to bundle the modules.
+
 ## 1.3.0 (2020-06-22)
 
 - Implemented inline decorations.
