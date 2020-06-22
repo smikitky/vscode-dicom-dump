@@ -36,7 +36,7 @@ const decorate = async (editor: vscode.TextEditor): Promise<void> => {
     if (contentText.length > 100) continue;
     decorations.push({
       range: line.range,
-      renderOptions: { after: { contentText } }
+      renderOptions: { after: { contentText: '(' + contentText + ')' } }
     });
   }
 
