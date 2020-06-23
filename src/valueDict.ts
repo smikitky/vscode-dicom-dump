@@ -153,6 +153,87 @@ const dict: ValueDict = {
     XA: 'X-Ray Angiography',
     XC: 'External-camera Photography'
   },
+  '0008,0064': {
+    // Conversion Type
+    DV: 'Digitized Video',
+    DI: 'Digital Interface',
+    DF: 'Digitized Film',
+    WSD: 'Workstation',
+    SD: 'Scanned Document',
+    SI: 'Scanned Image',
+    DRW: 'Drawing',
+    SYN: 'Synthetic Image'
+  },
+  '0018,0020': {
+    // Scanning Sequence
+    SE: 'Spin Echo',
+    IR: 'Inversion Recovery',
+    GR: 'Gradient Recalled',
+    EP: 'Echo Planar',
+    RM: 'Research Mode'
+  },
+  '0018,0021': {
+    // Sequence Variant
+    SK: 'Segmented k-space',
+    MTC: 'Magnetization transfer contrast',
+    SS: 'Steady state',
+    TRSS: 'Time reversed steady state',
+    SP: 'Spoiled',
+    MP: 'MAG prepared',
+    OSP: 'Oversampling phase',
+    NONE: 'No sequence variant'
+  },
+  '0018,0022': {
+    // Scan Options
+    PER: 'Phase Encode Reordering',
+    RG: 'Respiratory Gating',
+    CG: 'Cardiac Gating',
+    PPG: 'Peripheral Pulse Gating',
+    FC: 'Flow Compensation',
+    PFF: 'Partial Fourier - Frequency',
+    PFP: 'Partial Fourier - Phase',
+    SP: 'Spatial Presaturation',
+    FS: 'Fat Saturation'
+  },
+  '0018,0071': {
+    // Acquisition Termination Condition
+    CNTS: 'Counts',
+    DENS: 'Density',
+    MANU: 'Manual',
+    OVFL: 'Data overflow',
+    TIME: 'Time',
+    TRIG: 'Physiological trigger'
+  },
+  '0018,1140': {
+    // Rotation Direction
+    CW: 'Clockwise',
+    CC: 'Counter clockwise'
+  },
+  '0018,1155': {
+    SC:
+      'Low dose exposure generally corresponding to fluoroscopic settings (e.g., preparation for diagnostic quality image acquisition)',
+    GR:
+      'High dose for diagnostic quality image acquisition (also called digital spot or cine)'
+  },
+  '0018,1181': {
+    // Collimator Type
+    PARA: 'Parallel (default)',
+    PINH: 'Pinhole',
+    FANB: 'Fan-beam',
+    CONE: 'Cone-beam',
+    SLNT: 'Slant hole',
+    ASTG: 'Astigmatic',
+    DIVG: 'Diverging',
+    NONE: 'No collimator',
+    UNKN: 'Unknown'
+  },
+  '0018,1301': {
+    // Whole Body Technique
+    '1PS': 'One pass',
+    '2PS': 'Two pass',
+    PCN: 'Patient contour following employed',
+    MSP: 'Multiple static frames collected into a whole body frame'
+  },
   '0018,5100': {
     // Patient Position
     HFP: 'Head First-Prone',
@@ -163,6 +244,25 @@ const dict: ValueDict = {
     FFDL: 'Feet First-Decubitus Left',
     FFP: 'Feet First-Prone',
     FFS: 'Feet First-Supine'
+  },
+  '0018,5101': {
+    // View Position
+    AP: 'Anterior/Posterior',
+    PA: 'Posterior/Anterior',
+    LL: 'Left Lateral',
+    RL: 'Right Lateral',
+    RLD: 'Right Lateral Decubitus',
+    LLD: 'Left Lateral Decubitus',
+    RLO: 'Right Lateral Oblique',
+    LLO: 'Left Lateral Oblique'
+  },
+  '0018,9372': {
+    // Multi-energy Detector Type
+    INTEGRATING: 'Physical detector integrates the full X-Ray spectrum.',
+    MULTILAYER:
+      'Physical detector layers absorb different parts of the X-Ray spectrum.',
+    PHOTON_COUNTING:
+      'Physical detector counts photons with energy discrimination capability.'
   },
   '0028,0004': {
     // Photometric Interpretation
@@ -194,16 +294,41 @@ const dict: ValueDict = {
     '1':
       'Each color plane shall be sent contiguously. For RGB images, this means the order of the pixel values sent is R1, R2, R3, …, G1, G2, G3, …, B1, B2, B3, etc.'
   },
+  '0028,0014': {
+    // Ultrasound Color Data Present
+    '00': 'Ultrasound color data not present in image',
+    '01': 'Ultrasound color data is present in image'
+  },
+  '0028,0051': {
+    // Corrected Image
+    UNIF: 'Flood corrected',
+    COR: 'Center of rotation corrected',
+    NCO: 'Non-circular orbit corrected',
+    DECY: 'Decay corrected',
+    ATTN: 'Attenuation corrected',
+    SCAT: 'Scatter corrected',
+    DTIM: 'Dead time corrected',
+    NRGY: 'Energy corrected',
+    LIN: 'Linearity corrected',
+    MOTN: 'Motion corrected',
+    CLN:
+      'Count loss normalization; Any type of normalization applied to correct for count loss in Time Slots.'
+  },
   '0028,0103': {
     // Pixel Representation
-    '0': '0: Pixel samples are represented in unsigned integer.',
-    '1': "1: Pixel samples are represnted in 2's complement (signed integer)."
+    '0': 'Pixel samples are represented in unsigned integer.',
+    '1': "Pixel samples are represnted in 2's complement (signed integer)."
   },
   '0028,1040': {
     // Pixel Intensity Relationship
     LIN: 'Pixel samples are linearly proportional to X-Ray beam intensity.',
     LOG:
       'Pixel samples are logarithmically proportional to X-Ray beam intensity.'
+  },
+  '0028,2110': {
+    // Lossy Image Compression
+    '00': 'Image has NOT been subjected to lossy compression.',
+    '01': 'Image has been subjected to lossy compression.'
   }
 };
 
