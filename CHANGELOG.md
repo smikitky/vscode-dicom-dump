@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.4.0 (2020-06-23)
+
+- Increased the number of tags that provide hovers/decorations.
+- Minor bugfixes.
+
 ## 1.3.1 (2020-06-22)
 
 - Decorations are now enclosed in parentheses.
