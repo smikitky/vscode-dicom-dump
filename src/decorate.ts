@@ -33,7 +33,7 @@ const decorate = async (editor: vscode.TextEditor): Promise<void> => {
       .split('\\')
       .map(item => valueDict[tag][item] ?? '')
       .join('\\');
-    if (contentText.length > 100) continue;
+    if (contentText.length > 100 || contentText.length === 0) continue;
     decorations.push({
       range: line.range,
       renderOptions: { after: { contentText: '(' + contentText + ')' } }
