@@ -145,7 +145,7 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "webpack --mode production",
+    "vscode:prepublish": "rimraf out && webpack --mode production",
     "compile": "webpack --mode development",
     "lint": "eslint \"src/**/*.ts\"",
     "watch": "webpack --mode development",
@@ -164,6 +164,7 @@
     "glob": "^7.1.6",
     "mocha": "^8.0.1",
     "prettier": "^2.0.5",
+    "rimraf": "^3.0.2",
     "ts-loader": "^7.0.5",
     "typescript": "^3.9.5",
     "vscode-test": "^1.4.0",
