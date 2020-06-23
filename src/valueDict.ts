@@ -7,8 +7,7 @@ interface ValueDict {
 const dict: ValueDict = {
   '0002,0010': {
     // Transfer Syntax UID
-    '1.2.840.10008.1.2':
-      'Implicit VR Endian: Default Transfer Syntax for DICOM',
+    '1.2.840.10008.1.2': 'Implicit VR Little Endian',
     '1.2.840.10008.1.2.1': 'Explicit VR Little Endian',
     '1.2.840.10008.1.2.1.99': 'Deflated Explicit VR Little Endian',
     '1.2.840.10008.1.2.2': 'Explicit VR Big Endian',
@@ -210,10 +209,9 @@ const dict: ValueDict = {
     CC: 'Counter clockwise'
   },
   '0018,1155': {
-    SC:
-      'Low dose exposure generally corresponding to fluoroscopic settings (e.g., preparation for diagnostic quality image acquisition)',
-    GR:
-      'High dose for diagnostic quality image acquisition (also called digital spot or cine)'
+    // Radiation Setting
+    SC: 'Low dose exposure generally corresponding to fluoroscopic settings',
+    GR: 'High dose for diagnostic quality image acquisition'
   },
   '0018,1181': {
     // Collimator Type
