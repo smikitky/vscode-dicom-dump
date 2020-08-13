@@ -1,6 +1,7 @@
-import { DataSet } from 'dicom-parser';
+import { DataSet, Element } from 'dicom-parser';
 import { DicomDataElements, TagInfo } from 'dicom-data-dictionary';
 import { EncConverter } from './encConverter';
+import { PrivateTagDict } from './privateTagDict';
 
 export interface ParsedElement {
   tag: string; // like '(0008,0060)'
@@ -160,6 +161,44 @@ function findTagInfo(
   return undefined;
 }
 
+function findTagInfoPrivate(
+  dictionary: PrivateTagDict,
+  privateCreatorTable: any,
+  dataSet: DataSet,
+  element: Element,
+  encConverter: EncConverter
+): (TagInfo & { forceVr?: string }) | undefined {
+
+  const tag = element.tag;
+  const privateCreatorLow = tag.substring(5, 7);
+
+  if (privateCreatorLow === '00') {
+    const bin = Buffer.from(
+      dataSet.byteArray.buffer,
+      element.dataOffset,
+      element.length
+    );
+    const privateCreator = encConverter(bin, 'LO');
+    privateCreatorTable[tag] = privateCreator.trim();
+    return { name: 'PrivateCreator', vr: 'LO' };
+  }
+
+  const privateCreatorKey = 'x' + tag.substring(1, 5) + '00' + privateCreatorLow;
+  if (privateCreatorKey in privateCreatorTable) {
+    const privateCreator = privateCreatorTable[privateCreatorKey];
+
+    if (privateCreator in dictionary) {
+      const privateKey = tag.substring(1, 5) + '00' + tag.substring(7, 9);
+      const privateDictionary = dictionary[privateCreator];
+
+      if (privateDictionary !== undefined && privateKey in privateDictionary) {
+        return privateDictionary[privateKey];
+      }
+    }
+  }
+  return { name: privateCreatorKey, vr: 'LO' };
+}
+
 /**
  * Iterates of DICOM dataSet from dicom-parser and creates a
  * human-readable tree, which then can be transformed into a text document.
@@ -172,10 +211,12 @@ export function buildTreeFromDataSet(
     rootDataSet: DataSet;
     showPrivateTags: boolean;
     dictionary: DicomDataElements;
+    privateDictionary: PrivateTagDict;
     encConverter: EncConverter;
   }
 ): ParsedElement[] {
-  const { rootDataSet, showPrivateTags, dictionary, encConverter } = deps;
+  const { rootDataSet, showPrivateTags, dictionary, privateDictionary, encConverter } = deps;
+  const privateCreatorTable = {};
   const entries: ParsedElement[] = [];
   const keys = Object.keys(dataSet.elements).sort();
   for (const key of keys) {
@@ -188,7 +229,10 @@ export function buildTreeFromDataSet(
     // "Item delimitation" tag in a sequence
     if (key === 'xfffee00d') continue;
 
-    const tagInfo = findTagInfo(dictionary, element.tag);
+    const tagInfo = isPrivateTag
+      ? findTagInfoPrivate(privateDictionary, privateCreatorTable, dataSet, element, encConverter)
+      : findTagInfo(dictionary, element.tag);
+
     const vr: string =
       (tagInfo && tagInfo.forceVr && tagInfo.vr) ||
       element.vr ||
