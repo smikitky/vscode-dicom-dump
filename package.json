@@ -86,6 +86,41 @@
               }
             },
             "additionalProperties": false
+          },
+          "dicom.privateDictionary": {
+            "description": "The list of private creator and private tags information. Key is private creator. value is object of DICOM tags. but style is ODDS00XX",
+            "type": "object",
+            "patternProperties": {
+              ".*": {
+                "description": "The list of private DICOM tags that will be used along with private tags. Each key must be an 8-digit uppercase hex string representing the DICOM group/element. but style is ODDS00XX",
+                "type": "object",
+                "patternProperties": {
+                  "^[0-9A-F]{8}$": {
+                    "type": "object",
+                    "properties": {
+                      "vr": {
+                        "description": "Value representation name, such as 'SL'.",
+                        "type": "string",
+                        "pattern": "^[A-Z]{2}$"
+                      },
+                      "name": {
+                        "description": "Element name (camelCase recommended).",
+                        "type": "string"
+                      },
+                      "forceVr": {
+                        "description": "Force this VR type for this element. Use with care.",
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "vr",
+                      "name"
+                    ]
+                  }
+                }
+              }
+            },
+            "additionalProperties": false
           }
         }
       }

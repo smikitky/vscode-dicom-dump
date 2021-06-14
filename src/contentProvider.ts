@@ -4,6 +4,7 @@ import * as parser from 'dicom-parser';
 import { standardDataElements, DicomDataElements } from 'dicom-data-dictionary';
 import { EncConverter, createEncConverter } from './encConverter';
 import { buildTreeFromDataSet, ParsedElement } from './extractor';
+import { PrivateTagDict } from "./privateTagDict";
 
 /**
  * Transforms the parsed elements into indented text.
@@ -62,6 +63,7 @@ export default class DicomContentProvider
     const config = vscode.workspace.getConfiguration('dicom');
     const additionalDict: DicomDataElements = config.get('dictionary') || {};
     const dictionary = Object.assign({}, standardDataElements, additionalDict);
+    const privateDictionary: PrivateTagDict = config.get('privateDictionary') || {};
     const showPrivateTags = !!config.get('showPrivateTags');
 
     if (!(uri instanceof vscode.Uri)) return '';
@@ -92,6 +94,7 @@ export default class DicomContentProvider
       rootDataSet,
       showPrivateTags,
       dictionary,
+      privateDictionary,
       encConverter
     });
 
